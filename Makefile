@@ -13,8 +13,9 @@ CFLAGS += -Wpadded
 CFLAGS += -fsanitize=address
 #CFLAGS += -march=native
 #CFLAGS += -pthread
-SFLAGS = -std=c89 -pedantic
+SFLAGS = -std=gnu89 -pedantic
 INCLUDES = -I.
+LIBS = -lusb-1.0
 SRCS = $(wildcard $(SRCDIR)/*.c)
 OBJS=$(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 

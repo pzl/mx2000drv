@@ -4,15 +4,12 @@
 
 
 int main(int argc, char **argv) {
-	int fd;
-
 	(void) argc;
 	(void) argv;
 
-
-	fd = register_device();
-	write_character(fd, 32);
-	destroy_device(fd);
+	initialize_usb();
+	find_device();
+	finish_usb();
 
 	return 0;
 }

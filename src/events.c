@@ -82,7 +82,6 @@ int write_character(int fd, int c) {
 	ev.value=1;
 
 	if (write(fd, &ev, sizeof(struct input_event)) < 0) {
-		/*fprintf(stderr, "Error writing character\n");*/
 		perror("Error writing character");
 		err=1;
 	}
