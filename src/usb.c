@@ -85,7 +85,7 @@ static int _is_mx(libusb_device *device) {
 		fprintf(stderr, "Error getting device desc\n");
 		return 0;
 	}
-	if (desc.idVendor == 0x1ea7 && desc.idProduct == 0x002c) {
+	if (desc.idVendor == MX_VENDOR_ID && desc.idProduct == MX_VENDOR_PRODUCT) {
 		return 1;
 	}
 
