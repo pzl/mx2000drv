@@ -3,7 +3,9 @@
 #include "usb.h"
 
 static int _is_mx(libusb_device *);
-static void device_info(libusb_device *);
+static void print_bytes(unsigned char *, int n);
+
+libusb_device_handle *handle;
 
 int initialize_usb(void) {
 	int ret;
@@ -31,17 +33,22 @@ int initialize_usb(void) {
 }
 
 
-void find_device(void) {
+int find_device(void) {
 	libusb_device **list;
 	libusb_device *mx = NULL;
-	libusb_device_handle *handle;
 	ssize_t count,
 			i;
+	int err;
+
+	if (handle != NULL){
+		fprintf(stderr, "Already active device\n");
+		return -2;
+	}
 
 	count = libusb_get_device_list(NULL, &list);
 	if (count < 0){
 		fprintf(stderr, "Problem enumerating USB devices\n");
-		return;
+		return -1;
 	}
 
 	for (i=0; i < count; i++){
@@ -54,7 +61,7 @@ void find_device(void) {
 	if (mx) {
 		if (libusb_open(mx, &handle)){
 			fprintf(stderr, "Error opening mx device\n");
-			return;
+			return -1;
 		}
 		if (libusb_set_auto_detach_kernel_driver(handle, 1) != LIBUSB_SUCCESS) {
 			fprintf(stderr, "Error setting automatic kernel detachment\n");
@@ -62,19 +69,96 @@ void find_device(void) {
 	}
 	printf("Opened mx device!\n");
 
-	device_info(mx);
+	if (libusb_kernel_driver_active(handle, MX_CONTROL_INTERFACE) == 1){
+		err = libusb_detach_kernel_driver(handle, MX_CONTROL_INTERFACE);
+		if (err < 0){
+			fprintf(stderr, "error detaching kernel driver: %s\n", libusb_strerror(err));
+		}
+	}
 
-	printf("kernel driver on interface 0: %d\n", libusb_kernel_driver_active(handle, 0));
-	printf("kernel driver on interface 1: %d\n", libusb_kernel_driver_active(handle, 1));
-	printf("kernel driver on interface 2: %d\n", libusb_kernel_driver_active(handle, 2));
-
+	err = libusb_claim_interface(handle, MX_CONTROL_INTERFACE);
+	if (err < 0){
+		fprintf(stderr, "error claiming interface %s\n", libusb_strerror(err));
+	}
+	
 
 	libusb_free_device_list(list, 1);
-	libusb_close(handle);
-	return;
+	return 0;
+}
+
+int change_profile(unsigned char profile) {
+	int err, nbytes_read;
+	unsigned char control_data[8] = {
+		0xb3, 0x20, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00
+	};
+	unsigned char data_read[8];
+
+
+	/* Make sure we have a valid device handle */
+	if (handle == NULL){
+		fprintf(stderr, "No device open for controlling\n");
+		return -1;
+	}
+
+	/* set profile choice in USB packet data */
+	control_data[3] = profile;
+
+
+	/* Send profile choice USB packet */
+	err = libusb_control_transfer(handle,
+	                        LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
+	                        0x09,
+	                        0x02b3, 2,
+	                        control_data, 8,
+	                        0);
+	if (err < 0){
+		printf("control error: %s\n", libusb_strerror(err));
+	}
+
+
+	/* Receive info back on profile change */
+	err = libusb_interrupt_transfer(handle,
+	                               LIBUSB_ENDPOINT_IN | 3,
+	                               data_read, 8,
+	                               &nbytes_read, 1000);
+	if (err < 0){
+		printf("readback error: %s\n", libusb_strerror(err));
+	}
+
+	if (nbytes_read < 8){
+		fprintf(stderr, "Possible data underflow when receiving profile change acknowledgment. Got %d bytes back\n", nbytes_read);
+	}
+
+
+	/* check constant bits for typical packet structure */
+	if ( ((long int)data_read & 0xFFFFFF000F00FFF) != 0xb320000003000e0f) {
+		printf("Unknown return data format when changing profile: ");
+		print_bytes(data_read, 8);
+		printf("\n");
+	}
+
+	if (data_read[3] != 0x0F || data_read[5] != 0x00) {
+		printf("Profile duplicate bytes may be set: ");
+		print_bytes(data_read, 8);
+		printf("\n");
+	}
+
+	if ((data_read[4] >> 4) != profile){
+		fprintf(stderr, "Error: mouse did not acknowledge correct profile change");
+		print_bytes(data_read, 8);
+		printf("\n");
+	} else {
+		printf("Profile changed to %d\n", profile);
+	}
+
+	return err;
+
 }
 
 void finish_usb(void) {
+	libusb_release_interface(handle,2);
+	/*libusb_attach_kernel_driver(handle,2);*/
+	libusb_close(handle);
 	libusb_exit(NULL);
 }
 
@@ -85,67 +169,17 @@ static int _is_mx(libusb_device *device) {
 		fprintf(stderr, "Error getting device desc\n");
 		return 0;
 	}
-	if (desc.idVendor == MX_VENDOR_ID && desc.idProduct == MX_VENDOR_PRODUCT) {
+	if (desc.idVendor == MX_VENDOR_ID && desc.idProduct == MX_PRODUCT_ID) {
 		return 1;
 	}
 
 	return 0;
 }
 
-
-static void device_info(libusb_device *device) {
-	struct libusb_device_descriptor desc;
-	struct libusb_config_descriptor *config;
-	ssize_t i, j, k, m;
-
-	if (libusb_get_device_descriptor(device, &desc)){
-		fprintf(stderr, "Error getting device desc\n");
-		return;
+static void print_bytes(unsigned char *bytes, int n){
+	int i;
+	printf("0x");
+	for (i=0; i<n; i++){
+		printf("%02x", bytes[i]);
 	}
-
-	printf("\n\nNum configurations: %d\n"
-	       "Device Class: %d\n"
-	       "Vendor: 0x%04x "
-	       "Product: 0x%04x\n",
-	       desc.bNumConfigurations, desc.bDeviceClass,
-	       desc.idVendor, desc.idProduct);
-
-	for (i=0; i<desc.bNumConfigurations; i++){
-		if (libusb_get_config_descriptor(device,i,&config) != 0){
-			fprintf(stderr, "error getting config %d\n", (int)i);
-			continue;
-		}
-		printf("  ↳ Configuration %d (%d)\n"
-		       "    Num interfaces: %d\n",
-		       (int)i, config->bConfigurationValue,
-		       config->bNumInterfaces);
-		for (j=0; j<config->bNumInterfaces; j++){
-			printf("      ↳ Interface %d\n"
-			       "        Num settings: %d\n", 
-			       (int)j, config->interface[j].num_altsetting);
-
-			for (k=0; k<config->interface[j].num_altsetting; k++){
-				printf("        ↳ Setting %d (%d)\n"
-				       "          Num Endpoints: %d\n"
-				       "          Interface class: %d\n"
-				       "          Interface subclass: %d\n",
-				       (int)k,
-				       config->interface[j].altsetting[k].bAlternateSetting,
-				       config->interface[j].altsetting[k].bNumEndpoints,
-				       config->interface[j].altsetting[k].bInterfaceClass,
-				       config->interface[j].altsetting[k].bInterfaceSubClass
-				       );
-				for (m=0; m<config->interface[j].altsetting[k].bNumEndpoints; m++){
-					printf("            ↳ Endpoint %d\n"
-					       "              Endpoint address: 0x%x\n"
-					       "              Attributes: %d\n",
-					       (int) m, 
-					       config->interface[j].altsetting[k].endpoint[m].bEndpointAddress,
-					       config->interface[j].altsetting[k].endpoint[m].bmAttributes
-					       );
-				}
-			}
-		}
-	}
-
 }
