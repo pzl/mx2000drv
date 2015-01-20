@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "usb.h"
-#include "events.h"
 
 
 int main(int argc, char **argv) {
@@ -27,7 +26,7 @@ int main(int argc, char **argv) {
 		finish_usb();
 		return -1;
 	}
-	
+
 	finish_usb();
 	return 0;
 }

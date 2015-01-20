@@ -7,4 +7,3 @@ Dependencies
 ------------
 
 * **[libusb](http://libusb.info/)** for communicating with the mouse
-* **uinput** kernel module. You almost definitely have it already, but this is what's tying us to just linux right now. If you want to discuss porting to other systems, this is what we need to replace. It is how we're generating the key events.
