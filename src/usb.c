@@ -131,14 +131,19 @@ int change_profile(unsigned char profile) {
 
 
 	/* check constant bits for typical packet structure */
-	if ( ((long int)data_read & 0xFFFFFF000F00FFF) != 0xb320000003000e0f) {
+	if ( data_read[0] != 0xb3 ||
+	     data_read[1] != 0x20 ||
+	     data_read[2] != 0x00 ||
+	     (data_read[4] & 0x0F) != 0x03 ||
+	     data_read[6] != 0x0e ||
+	     data_read[7] != 0x0F) {
 		printf("Unknown return data format when changing profile: ");
 		print_bytes(data_read, 8);
 		printf("\n");
 	}
 
 	if (data_read[3] != 0x0F || data_read[5] != 0x00) {
-		printf("Profile duplicate bytes may be set: ");
+		printf("Special profile bits were set: ");
 		print_bytes(data_read, 8);
 		printf("\n");
 	}
