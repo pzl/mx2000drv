@@ -24,8 +24,9 @@ int initialize_usb(void) {
 		if (libusb_has_capability(LIBUSB_CAP_SUPPORTS_DETACH_KERNEL_DRIVER) == 0) {
 			fprintf(stderr, "Warn: may not be able to detach kernel driver\n");
 		}
-		ret = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG);
-		printf("hotplug support: %d\n", ret);
+
+		//hotplug support
+		//ret = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG);
 	}
 
 	return 0;
