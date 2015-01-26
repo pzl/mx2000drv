@@ -24,8 +24,7 @@ sudo udevadm trigger
 
 Notes
 ---------
- 
-* This project is written in ANSI (C89) C.  I have not actively tried to compile it using MSVC, so a few things may need to be changed to get this to compile on Windows or other platforms. But it should be minimal effort. It is designed to be fairly cross-platform.
+
 * This is a userspace driver, not for use as part of the kernel
 * This driver is only for settings configuration. It does not interact with the pointer or keyboard interfaces of the mouse. These will continue to use the default HID driver.
 
