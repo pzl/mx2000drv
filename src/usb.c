@@ -3,7 +3,6 @@
 #include "usb.h"
 
 static int _is_mx(libusb_device *);
-static void print_bytes(unsigned char *, int n);
 
 libusb_device_handle *handle;
 
@@ -86,13 +85,15 @@ int find_device(void) {
 	return 0;
 }
 
-int change_profile(unsigned char profile) {
-	int err, nbytes_read;
-	unsigned char control_data[8] = {
-		0xb3, 0x20, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00
-	};
-	unsigned char data_read[8];
+/*
+	Sends command to device
+	buf: unsigned char[8] - command to send
 
+	returns: 0 on success
+			negative for err
+*/
+int send_command(unsigned char *buf) {
+	int err;
 
 	/* Make sure we have a valid device handle */
 	if (handle == NULL){
@@ -100,69 +101,48 @@ int change_profile(unsigned char profile) {
 		return -1;
 	}
 
-	/* set profile choice in USB packet data */
-	control_data[3] = profile;
-
-
-	/* Send profile choice USB packet */
 	err = libusb_control_transfer(handle,
-	                        LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
-	                        0x09,
-	                        0x02b3, 2,
-	                        control_data, 8,
-	                        0);
+	        LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE, /* bmRequestType 0x21 */
+	        0x09,													/* bRequest */
+	        0x02b3,													/* wValue */
+	        2,														/* wIndex */
+	        buf, 
+	        8,														/* data length */
+	        0);														/* timeout */
 	if (err < 0){
 		printf("control error: %s\n", libusb_strerror(err));
+		return -2;
 	}
+	return 0;
+}
+
+int read_back(unsigned char *buf){
+	int err,
+		nbytes_read;
 
 
-	/* Receive info back on profile change */
 	err = libusb_interrupt_transfer(handle,
-	                               LIBUSB_ENDPOINT_IN | 3,
-	                               data_read, 8,
-	                               &nbytes_read, 1000);
+	        LIBUSB_ENDPOINT_IN | 3,
+	        buf, 8,
+	        &nbytes_read, 1000);
+
 	if (err < 0){
 		printf("readback error: %s\n", libusb_strerror(err));
+		return -1;
 	}
 
 	if (nbytes_read < 8){
 		fprintf(stderr, "Possible data underflow when receiving profile change acknowledgment. Got %d bytes back\n", nbytes_read);
+		return -2;
 	}
 
-
-	/* check constant bits for typical packet structure */
-	if ( data_read[0] != 0xb3 ||
-	     data_read[1] != 0x20 ||
-	     data_read[2] != 0x00 ||
-	     (data_read[4] & 0x0F) != 0x03 ||
-	     data_read[6] != 0x0e ||
-	     data_read[7] != 0x0F) {
-		printf("Unknown return data format when changing profile: ");
-		print_bytes(data_read, 8);
-		printf("\n");
-	}
-
-	if (data_read[3] != 0x0F || data_read[5] != 0x00) {
-		printf("Special profile bits were set: ");
-		print_bytes(data_read, 8);
-		printf("\n");
-	}
-
-	if ((data_read[4] >> 4) != profile){
-		fprintf(stderr, "Error: mouse did not acknowledge correct profile change");
-		print_bytes(data_read, 8);
-		printf("\n");
-	} else {
-		printf("Profile changed to %d\n", profile);
-	}
-
-	return err;
+	return 0;
 
 }
 
 void finish_usb(void) {
-	libusb_release_interface(handle,2);
-	/*libusb_attach_kernel_driver(handle,2);*/
+	libusb_release_interface(handle,MX_CONTROL_INTERFACE);
+	libusb_attach_kernel_driver(handle,MX_CONTROL_INTERFACE);
 	libusb_close(handle);
 	libusb_exit(NULL);
 }
@@ -179,12 +159,4 @@ static int _is_mx(libusb_device *device) {
 	}
 
 	return 0;
-}
-
-static void print_bytes(unsigned char *bytes, int n){
-	int i;
-	printf("0x");
-	for (i=0; i<n; i++){
-		printf("%02x", bytes[i]);
-	}
 }

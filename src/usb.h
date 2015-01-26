@@ -10,7 +10,8 @@ void finish_usb(void);
 
 int find_device(void);
 
-int change_profile(unsigned char profile);
+int send_command(unsigned char *buf);
+int read_back(unsigned char *buf);
 
 
 #endif
