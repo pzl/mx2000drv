@@ -23,7 +23,7 @@ PREFIX ?= /usr
 DEST = $(DESTDIR)$(PREFIX)/bin
 MANDIR = $(DESTDIR)$(PREFIX)/share/man
 
-
+RULES = 99-mx2000.rules
 
 all: CFLAGS += -O2
 all: $(TARGET)
@@ -46,17 +46,13 @@ $(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) $(SFLAGS) $(INCLUDES) -c -o $@ $< $(LIBS)
 
 
-#install:
-#	install -D -m 755 $(TARGET) "$(LIBDIR)/$(TARGET)"
-#	ln -srf "$(LIBDIR)/$(TARGET)" "$(LIBDIR)/$(TBASE)"
-#	ln -srf "$(LIBDIR)/$(TARGET)" "$(LIBDIR)/$(SONAME)"
+install:
+	install -D -m 755 $(TARGET) "$(DEST)/$(TARGET)"
+	install -D -m 644 udev/$(RULES) "$(DESTDIR)/etc/udev/rules.d/$(RULES)"
 
-#uninstall:
-#	$(RM) "$(LIBDIR)/$(TARGET)"
-#	$(RM) "$(LIBDIR)/$(STARGET)"
-#	$(RM) "$(LIBDIR)/$(TBASE)"
-#	$(RM) "$(LIBDIR)/$(SONAME)"
-#	$(RM) "$(INCDIR)/$(NAME).h"
+uninstall:
+	$(RM) "$(DEST)/$(TARGET)"
+	$(RM) "$(DESTDIR)/etc/udev/rules.d/$(RULES)"
 
 test:
 	$(CC) -o test test/*.c
