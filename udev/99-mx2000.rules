@@ -1,0 +1,4 @@
+# Perixx MX 2000 IIB Gaming Mouse
+# This file should be installed to /etc/udev/rules.d to allow you to run the configuration driver without being root
+
+SUBSYSTEM=="usb", ATTR{idVendor}=="1ea7", ATTR{idProduct}=="002c", MODE="0666"
