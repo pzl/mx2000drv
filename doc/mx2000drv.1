@@ -34,7 +34,7 @@ mx2000drv \- MX 2000II Mouse Driver
 \fBmx2000drv\fR [\fIOPTIONS\fR] \fICOMMAND\fR [\fIARGUMENTS\fR]
 .SH "DESCRIPTION"
 .sp
-\fBmx2000drv\fR is a configuration driver for the Perixx MX\-2000 II Gaming Mouse\&.
+\fBmx2000drv\fR is a configuration driver for the Perixx MX\-2000 II Gaming Mouse\&. It allows the user to change mouse settings, button mappings, and macros\&.
 .SH "OPTIONS"
 .PP
 \fB\-h, \-\-help\fR
@@ -59,37 +59,16 @@ setting inside those commands\&. If not provided, the current active profile is 
 Print extra debug information\&.
 .RE
 .PP
-\fB\-\-version\fR
+\fB\-V, \-\-version\fR
 .RS 4
 Print driver version and exit\&.
 .RE
 .SH "COMMANDS"
-.SS "SET|GET"
+.SS "Configuration Commands"
 .sp
-inspecting or changing mouse profile settings\&.
+inspecting or changing mouse profile settings\&. Provide all arguments to change a setting to be that value\&. Leave off the final optional argument to retrieve the current value of that setting\&.
 .sp
-These commands require the \fB\-p\fR flag when used with any setting except \fBprofile\fR\&.
-.sp
-.it 1 an-trap
-.nr an-no-space-flag 1
-.nr an-break-flag 1
-.br
-.ps +1
-\fBGeneral Syntax\fR
-.RS 4
-.sp
-get \fISETTING\fR
-.sp
-set \fISETTING\fR \fIVALUE\fR
-.RE
-.sp
-.it 1 an-trap
-.nr an-no-space-flag 1
-.nr an-break-flag 1
-.br
-.ps +1
-\fBSettings\fR
-.RS 4
+These commands require the \fB\-p\fR option when used with any command except \fBprofile\fR\&.
 .PP
 \fBprofile\fR [\fIPROFILE\fR]
 .RS 4
@@ -98,14 +77,14 @@ The active mouse profile, an integer 1\-4\&. The
 option is ignored for this setting\&.
 .RE
 .PP
-\fBbutton\fR [\fIBUTTON NUM\fR] [\fIASSIGNMENT\fR]
+\fBbutton\fR \fIBUTTON NUM\fR [\fIASSIGNMENT\fR]
 .RS 4
 Map the specified button number to perform
 \fIASSIGNMENT\fR
 when clicked\&.
 .RE
 .PP
-\fBmacro\fR [\fIBUTTON NUM\fR] [\fISEQUENCE\fR]
+\fBmacro\fR \fIBUTTON NUM\fR [\fISEQUENCE\fR]
 .RS 4
 Map button to perform key
 \fISEQUENCE\fR
@@ -162,24 +141,9 @@ seconds after standby mode has come on\&.
 Enable or disable the backlight mouse LEDs
 .RE
 .PP
-\fBsensitivity\fR [\fIX\fR|\fIY\fR] [\fIVALUE\fR]
+\fBsensitivity\fR \fIX\fR|\fIY\fR [\fIVALUE\fR]
 .RS 4
-The mouse
-\fBsensitivity\fR
-to be a value between \-5 and 5, inclusive\&. When using
-\fBSET\fR, both parameters or only
-\fIVALUE\fR
-may be provided\&. When only
-\fIVALUE\fR, both
-\fIX\fR
-and
-\fIY\fR
-will change\&. When using
-\fBGET\fR,
-\fIX\fR
-or
-\fIY\fR
-must be provided\&.
+The pointer sensitivity, a value between \-5 and 5, inclusive\&.
 .RE
 .PP
 \fBaccel\fR [\fISPEED\fR]
@@ -190,7 +154,7 @@ The mouse acceleration in milliseconds, between 2 and 255\&.
 \fBdpi\fR \fIPRESET\fR [\fIVALUE\fR]
 .RS 4
 \fIPRESET\fR
-must be a number 1\-4 and is required for both commands\&.
+must be a number 1\-4\&.
 \fIVALUE\fR
 must be between 100 and 1600 in increments of 100
 .RE
@@ -199,13 +163,12 @@ must be between 100 and 1600 in increments of 100
 .RS 4
 Mouse polling rate in Hz: 125, 250, 500, 1000
 .RE
-.RE
 .SS "RESET"
 .sp
 Resets all mouse configurations, settings, macros, and profiles to factory default\&. Similar to a recovery mode\&.
 .SS "DUMP|LOAD"
 .sp
-Save or load the entire mouse configuration including all settings, macros, and profiles to or from a \fIFILE\fR\&. If \fI\-\fR is provided instead, stdout/stdin will be used\&.
+Save or load the entire mouse configuration including all settings, macros, and profiles to or from a \fIFILE\fR\&. \fB\-\fR may be provided in place of a file name for stdin/stdout\&.
 .sp
 .it 1 an-trap
 .nr an-no-space-flag 1
@@ -215,23 +178,23 @@ Save or load the entire mouse configuration including all settings, macros, and 
 \fBGeneral Syntax\fR
 .RS 4
 .sp
-dump \fIFILE\fR|\fI\-\fR
+dump \fIFILE\fR
 .sp
-load \fIFILE\fR|\fI\-\fR
+load \fIFILE\fR
 .RE
 .SH "EXAMPLE"
 .sp
 Change the active mouse profile to 3
 .sp
-\fBmx2000drv set profile 3\fR
+\fBmx2000drv profile 3\fR
 .sp
 Change profile 1 backlight color to blue
 .sp
-\fBmx2000drv \-p 1 set color 0000ff\fR
+\fBmx2000drv \-p 1 color 0000ff\fR
 .sp
 Get the current profile\(cqs acceleration value
 .sp
-\fBmx2000drv get accel\fR
+\fBmx2000drv accel\fR
 .sp
 Save current mouse configuration to file
 .sp

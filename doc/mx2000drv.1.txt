@@ -21,7 +21,7 @@ Synopsis
 Description
 -----------
 
-*mx2000drv* is a configuration driver for the Perixx MX-2000 II Gaming Mouse.
+*mx2000drv* is a configuration driver for the Perixx MX-2000 II Gaming Mouse. It allows the user to change mouse settings, button mappings, and macros.
 
 
 
@@ -37,7 +37,7 @@ Options
 *-v, --verbose*::
 	Print extra debug information.
 
-*--version*::
+*-V, --version*::
 	Print driver version and exit.
 
 
@@ -45,31 +45,21 @@ Options
 Commands
 --------
 
-SET|GET
-~~~~~~~~~
+Configuration Commands
+~~~~~~~~~~~~~~~~~~~~~~
 
-inspecting or changing mouse profile settings.
+inspecting or changing mouse profile settings. Provide all arguments to change a setting to be that value. Leave off the final optional argument to retrieve the current value of that setting.
 
-These commands require the *-p* flag when used with any setting except *profile*.
-
-General Syntax
-^^^^^^^^^^^^^^
-
-get 'SETTING'
-
-set 'SETTING' 'VALUE'
+These commands require the *-p* option when used with any command except *profile*.
 
 
-Settings
-^^^^^^^^
 *profile* ['PROFILE']::
-	The active mouse profile, an integer 1-4. The *-p* option
-	is ignored for this setting.
+	The active mouse profile, an integer 1-4. The *-p* option is ignored for this setting.
 
-*button* ['BUTTON NUM'] ['ASSIGNMENT']::
+*button* 'BUTTON NUM' ['ASSIGNMENT']::
 	Map the specified button number to perform 'ASSIGNMENT' when clicked.
 
-*macro* ['BUTTON NUM'] ['SEQUENCE']::
+*macro* 'BUTTON NUM' ['SEQUENCE']::
 	Map button to perform key 'SEQUENCE' when clicked.
 
 *color* ['RGB']::
@@ -96,14 +86,14 @@ Settings
 *backlight* ['ON'|'OFF']::
 	Enable or disable the backlight mouse LEDs
 
-*sensitivity* ['X'|'Y'] ['VALUE']::
-	The mouse *sensitivity* to be a value between -5 and 5, inclusive. When using *SET*, both parameters or only 'VALUE' may be provided. When only 'VALUE', both 'X' and 'Y' will change. When using *GET*, 'X' or 'Y' must be provided. 
+*sensitivity* 'X'|'Y' ['VALUE']::
+	The pointer sensitivity, a value between -5 and 5, inclusive.
 
 *accel* ['SPEED']::
 	The mouse acceleration in milliseconds, between 2 and 255.
 
 *dpi* 'PRESET' ['VALUE']::
-	'PRESET' must be a number 1-4 and is required for both commands. 'VALUE' must be between 100 and 1600 in increments of 100
+	'PRESET' must be a number 1-4. 'VALUE' must be between 100 and 1600 in increments of 100
 
 ////
 todo:
@@ -127,14 +117,14 @@ Resets all mouse configurations, settings, macros, and profiles to factory defau
 DUMP|LOAD
 ~~~~~~~~~~~
 
-Save or load the entire mouse configuration including all settings, macros, and profiles to or from a 'FILE'. If '-' is provided instead, stdout/stdin will be used.
+Save or load the entire mouse configuration including all settings, macros, and profiles to or from a 'FILE'. *-* may be provided in place of a file name for stdin/stdout.
 
 General Syntax
 ^^^^^^^^^^^^^^
 
-dump 'FILE'|'-'
+dump 'FILE'
 
-load 'FILE'|'-'
+load 'FILE'
 
 
 Example
@@ -142,17 +132,17 @@ Example
 
 Change the active mouse profile to 3
 
-*mx2000drv set profile 3*
+*mx2000drv profile 3*
 
 
 Change profile 1 backlight color to blue
 
-*mx2000drv -p 1 set color 0000ff*
+*mx2000drv -p 1 color 0000ff*
 
 
 Get the current profile's acceleration value
 
-*mx2000drv get accel*
+*mx2000drv accel*
 
 
 Save current mouse configuration to file
