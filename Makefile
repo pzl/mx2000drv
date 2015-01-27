@@ -8,11 +8,10 @@ OBJDIR = build
 CC = gcc
 CFLAGS += -Wall -Wextra
 CFLAGS += -Wfloat-equal -Wundef -Wshadow -Wpointer-arith -Wcast-align
-CFLAGS += -Wstrict-prototypes -Wwrite-strings -ftrapv
-CFLAGS += -Wpadded
+CFLAGS += -Wstrict-prototypes -Wwrite-strings -ftrapv -Wpadded
 CFLAGS += -fsanitize=address
 #CFLAGS += -march=native
-#CFLAGS += -pthread
+CFLAGS += -DVERSION=\"$(VERSION)\"
 SFLAGS = -std=c99 -pedantic
 INCLUDES = -I.
 LIBS = -lusb-1.0
@@ -20,8 +19,13 @@ SRCS = $(wildcard $(SRCDIR)/*.c)
 OBJS=$(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 PREFIX ?= /usr
-DEST = $(DESTDIR)$(PREFIX)/bin
-MANDIR = $(DESTDIR)$(PREFIX)/share/man
+BINDIR = $(DESTDIR)/$(PREFIX)/bin
+MANDIR = $(DESTDIR)/$(PREFIX)/share/man
+BSHDIR = $(DESTDIR)/$(PREFIX)/share/bash-completion/completions
+ZSHDIR = $(DESTDIR)/$(PREFIX)/share/zsh/site-functions
+UDVDIR = $(DESTDIR)/etc/udev/rules.d
+
+
 
 RULES = 99-mx2000.rules
 
@@ -47,12 +51,12 @@ $(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
 
 
 install:
-	install -D -m 755 $(TARGET) "$(DEST)/$(TARGET)"
-	install -D -m 644 udev/$(RULES) "$(DESTDIR)/etc/udev/rules.d/$(RULES)"
+	install -D -m 755 $(TARGET) "$(BINDIR)/$(TARGET)"
+	install -D -m 644 udev/$(RULES) "$(UDVDIR)/$(RULES)"
 
 uninstall:
-	$(RM) "$(DEST)/$(TARGET)"
-	$(RM) "$(DESTDIR)/etc/udev/rules.d/$(RULES)"
+	$(RM) "$(BINDIR)/$(TARGET)"
+	$(RM) "$(UDVDIR)/$(RULES)"
 
 test:
 	$(CC) -o test test/*.c
