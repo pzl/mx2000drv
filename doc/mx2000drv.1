@@ -51,7 +51,7 @@ and
 \fBSET\fR
 commands, and ignored for the
 \fBprofile\fR
-setting inside those commands\&.
+setting inside those commands\&. If not provided, the current active profile is assumed\&.
 .RE
 .PP
 \fB\-v, \-\-verbose\fR
@@ -219,6 +219,23 @@ dump \fIFILE\fR|\fI\-\fR
 .sp
 load \fIFILE\fR|\fI\-\fR
 .RE
+.SH "EXAMPLE"
+.sp
+Change the active mouse profile to 3
+.sp
+\fBmx2000drv set profile 3\fR
+.sp
+Change profile 1 backlight color to blue
+.sp
+\fBmx2000drv \-p 1 set color 0000ff\fR
+.sp
+Get the current profile\(cqs acceleration value
+.sp
+\fBmx2000drv get accel\fR
+.sp
+Save current mouse configuration to file
+.sp
+\fBmx2000drv dump mem\&.bin\fR
 .SH "AUTHORS"
 .sp
 Dan Panzarella <alsoelp at gmail\&.com>

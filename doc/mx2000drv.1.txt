@@ -32,7 +32,7 @@ Options
 	Show syntax help and exit.
 
 *-p, --profile*='PROFILE'::
-	Target the active mouse profile, 'PROFILE', an integer between 1-4, inclusive. This option is only used for the *GET* and *SET* commands, and ignored for the *profile* setting inside those commands.
+	Target the active mouse profile, 'PROFILE', an integer between 1-4, inclusive. This option is only used for the *GET* and *SET* commands, and ignored for the *profile* setting inside those commands. If not provided, the current active profile is assumed.
 
 *-v, --verbose*::
 	Print extra debug information.
@@ -135,6 +135,30 @@ General Syntax
 dump 'FILE'|'-'
 
 load 'FILE'|'-'
+
+
+Example
+--------
+
+Change the active mouse profile to 3
+
+*mx2000drv set profile 3*
+
+
+Change profile 1 backlight color to blue
+
+*mx2000drv -p 1 set color 0000ff*
+
+
+Get the current profile's acceleration value
+
+*mx2000drv get accel*
+
+
+Save current mouse configuration to file
+
+*mx2000drv dump mem.bin*
+
 
 
 Authors
