@@ -5,6 +5,18 @@
 #include "mx.h"
 
 
+int get_active_profile(void) {
+	/*
+	int err;
+	unsigned char *command[MSG_LEN] = {
+		0xb3
+	}
+
+	err = send_command()
+	*/
+	return 0;
+}
+
 int read_info(void) {
 	FILE *fp;
 	int err, i, j;

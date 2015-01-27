@@ -26,5 +26,7 @@ int read_info(void);
 
 int read_addr(int profile, unsigned char addr, unsigned char *response);
 
+int get_active_profile(void);
+
 
 #endif
