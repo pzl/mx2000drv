@@ -15,7 +15,7 @@ mx2000drv - MX 2000II Mouse Driver
 Synopsis
 --------
 
-*mx2000drv* 'COMMAND' ['ARGUMENTS']
+*mx2000drv* ['OPTIONS'] 'COMMAND' ['ARGUMENTS']
 
 
 Description
@@ -27,5 +27,102 @@ Description
 Commands
 --------
 
-*-f*, *--focus* ['THING']::
-	focus on this thing
+SET|GET
+~~~~~~~~~
+
+inspecting or changing mouse profile settings.
+
+These commands require the *-p* flag when used with any setting except *profile*.
+
+General Syntax
+^^^^^^^^^^^^^^
+
+[*-p* 'PROFILE'] GET 'SETTING'
+
+[*-p* 'PROFILE'] SET 'SETTING' 'VALUE'
+
+
+Settings
+^^^^^^^^
+*profile* ['PROFILE']::
+	The active mouse profile, an integer 1-4. The *-p* option
+	is ignored for this setting.
+
+*button* ['BUTTON NUM'] ['ASSIGNMENT']::
+	Map the specified button number to perform 'ASSIGNMENT' when clicked.
+
+*macro* ['BUTTON NUM'] ['SEQUENCE']::
+	Map button to perform key 'SEQUENCE' when clicked.
+
+*color* ['RGB']::
+	Mouse backlight color as 6-character hexadecimal
+
+*breathe* ['ON'|'OFF']::
+	Whether the mouse LEDs fade and pulse over time
+
+*cycle* ['ON'|'OFF']::
+	Whether the mouse cycles through the colors red, green, blue, cyan, white, purple, yellow with each fade. When enabled, ignores *color* setting.
+
+*lit* ['TIME']::
+	Number of seconds the backlight is steady on when *breathe* is enabled.
+
+*dark* ['TIME']::
+	Number of seconds the backlight is dim when *breathe* is enabled.
+
+*pulse* ['TIME']::
+	Number of seconds the backlight takes to transition from lit to dark, when *breathe* is enabled.
+
+*standby* ['TIME']::
+	Enable backlight 'TIME' seconds after standby mode has come on.
+
+*backlight* ['ON'|'OFF']::
+	Enable or disable the backlight mouse LEDs
+
+*sensitivity* ['X'|'Y'] ['VALUE']::
+	The mouse *sensitivity* to be a value between -5 and 5, inclusive. When using *SET*, both parameters or only 'VALUE' may be provided. When only 'VALUE', both 'X' and 'Y' will change. When using *GET*, 'X' or 'Y' must be provided. 
+
+*accel* ['SPEED']::
+	The mouse acceleration in milliseconds, between 2 and 255.
+
+*dpi* 'PRESET' ['VALUE']::
+	'PRESET' must be a number 1-4 and is required for both commands. 'VALUE' must be between 100 and 1600 in increments of 100
+
+////
+todo:
+select/fetch an active dpi preset
+
+////
+
+*poll* ['RATE']::
+	Mouse polling rate in Hz: 125, 250, 500, 1000
+
+
+
+
+RESET
+~~~~~
+
+Resets all mouse configurations, settings, macros, and profiles to factory default. Similar to a recovery mode.
+
+
+
+DUMP|LOAD
+~~~~~~~~~~~
+
+Save or load the entire mouse configuration including all settings, macros, and profiles to or from a 'FILE'. If '-' is provided instead, stdout/stdin will be used.
+
+General Syntax
+^^^^^^^^^^^^^^
+
+DUMP ['FILE'|'-']
+
+LOAD ['FILE'|'-']
+
+
+
+
+Author
+------
+
+Dan Panzarella <alsoelp at gmail.com>
+
