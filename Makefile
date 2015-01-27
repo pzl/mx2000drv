@@ -20,7 +20,7 @@ OBJS=$(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 PREFIX ?= /usr
 BINDIR = $(DESTDIR)/$(PREFIX)/bin
-MANDIR = $(DESTDIR)/$(PREFIX)/share/man
+MANDIR = $(DESTDIR)/$(PREFIX)/share/man/man1
 BSHDIR = $(DESTDIR)/$(PREFIX)/share/bash-completion/completions
 ZSHDIR = $(DESTDIR)/$(PREFIX)/share/zsh/site-functions
 UDVDIR = $(DESTDIR)/etc/udev/rules.d
@@ -53,15 +53,20 @@ $(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
 install:
 	install -D -m 755 $(TARGET) "$(BINDIR)/$(TARGET)"
 	install -D -m 644 udev/$(RULES) "$(UDVDIR)/$(RULES)"
+	install -D -m 644 doc/$(TARGET).1 "$(MANDIR)/$(TARGET).1"
 
 uninstall:
 	$(RM) "$(BINDIR)/$(TARGET)"
 	$(RM) "$(UDVDIR)/$(RULES)"
+	$(RM) "$(MANDIR)/$(TARGET).1"
 
 test:
 	$(CC) -o test test/*.c
 
+doc:
+	a2x -v -d manpage -f manpage -a revnumber=$(VERSION) doc/$(TARGET).1.txt
+
 clean:
 	$(RM) $(OBJS) $(TARGET)
 
-.PHONY: all debug clean install uninstall test
+.PHONY: all debug clean install uninstall test doc

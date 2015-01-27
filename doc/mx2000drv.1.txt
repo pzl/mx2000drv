@@ -1,0 +1,31 @@
+:man source: mx2000drv
+:man version: {revnumber}
+:man manual: mx2000drv Manual
+
+
+mx2000drv(1)
+============
+
+Name
+----
+
+mx2000drv - MX 2000II Mouse Driver
+
+
+Synopsis
+--------
+
+*mx2000drv* 'COMMAND' ['ARGUMENTS']
+
+
+Description
+-----------
+
+*mx2000drv* is a configuration driver for the Perixx MX-2000 II Gaming Mouse.
+
+
+Commands
+--------
+
+*-f*, *--focus* ['THING']::
+	focus on this thing
