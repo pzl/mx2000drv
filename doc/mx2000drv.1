@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: mx2000drv
-.\"    Author: [see the "Author" section]
+.\"    Author: [see the "Authors" section]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 01/26/2015
+.\"      Date: 01/27/2015
 .\"    Manual: mx2000drv Manual
 .\"    Source: mx2000drv 0.0.1
 .\"  Language: English
 .\"
-.TH "MX2000DRV" "1" "01/26/2015" "mx2000drv 0\&.0\&.1" "mx2000drv Manual"
+.TH "MX2000DRV" "1" "01/27/2015" "mx2000drv 0\&.0\&.1" "mx2000drv Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -35,6 +35,34 @@ mx2000drv \- MX 2000II Mouse Driver
 .SH "DESCRIPTION"
 .sp
 \fBmx2000drv\fR is a configuration driver for the Perixx MX\-2000 II Gaming Mouse\&.
+.SH "OPTIONS"
+.PP
+\fB\-h, \-\-help\fR
+.RS 4
+Show syntax help and exit\&.
+.RE
+.PP
+\fB\-p, \-\-profile\fR=\fIPROFILE\fR
+.RS 4
+Target the active mouse profile,
+\fIPROFILE\fR, an integer between 1\-4, inclusive\&. This option is only used for the
+\fBGET\fR
+and
+\fBSET\fR
+commands, and ignored for the
+\fBprofile\fR
+setting inside those commands\&.
+.RE
+.PP
+\fB\-v, \-\-verbose\fR
+.RS 4
+Print extra debug information\&.
+.RE
+.PP
+\fB\-\-version\fR
+.RS 4
+Print driver version and exit\&.
+.RE
 .SH "COMMANDS"
 .SS "SET|GET"
 .sp
@@ -50,9 +78,9 @@ These commands require the \fB\-p\fR flag when used with any setting except \fBp
 \fBGeneral Syntax\fR
 .RS 4
 .sp
-[\fB\-p\fR \fIPROFILE\fR] GET \fISETTING\fR
+get \fISETTING\fR
 .sp
-[\fB\-p\fR \fIPROFILE\fR] SET \fISETTING\fR \fIVALUE\fR
+set \fISETTING\fR \fIVALUE\fR
 .RE
 .sp
 .it 1 an-trap
@@ -65,9 +93,8 @@ These commands require the \fB\-p\fR flag when used with any setting except \fBp
 .PP
 \fBprofile\fR [\fIPROFILE\fR]
 .RS 4
-The active mouse
-\fIPROFILE\fR, an integer 1\-4\&. The
-\fI\-p\fR
+The active mouse profile, an integer 1\-4\&. The
+\fB\-p\fR
 option is ignored for this setting\&.
 .RE
 .PP
@@ -188,10 +215,10 @@ Save or load the entire mouse configuration including all settings, macros, and 
 \fBGeneral Syntax\fR
 .RS 4
 .sp
-DUMP [\fIFILE\fR|\fI\-\fR]
+dump \fIFILE\fR|\fI\-\fR
 .sp
-LOAD [\fIFILE\fR|\fI\-\fR]
+load \fIFILE\fR|\fI\-\fR
 .RE
-.SH "AUTHOR"
+.SH "AUTHORS"
 .sp
 Dan Panzarella <alsoelp at gmail\&.com>

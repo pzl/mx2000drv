@@ -24,6 +24,24 @@ Description
 *mx2000drv* is a configuration driver for the Perixx MX-2000 II Gaming Mouse.
 
 
+
+Options
+-------
+
+*-h, --help*::
+	Show syntax help and exit.
+
+*-p, --profile*='PROFILE'::
+	Target the active mouse profile, 'PROFILE', an integer between 1-4, inclusive. This option is only used for the *GET* and *SET* commands, and ignored for the *profile* setting inside those commands.
+
+*-v, --verbose*::
+	Print extra debug information.
+
+*--version*::
+	Print driver version and exit.
+
+
+
 Commands
 --------
 
@@ -37,9 +55,9 @@ These commands require the *-p* flag when used with any setting except *profile*
 General Syntax
 ^^^^^^^^^^^^^^
 
-[*-p* 'PROFILE'] GET 'SETTING'
+get 'SETTING'
 
-[*-p* 'PROFILE'] SET 'SETTING' 'VALUE'
+set 'SETTING' 'VALUE'
 
 
 Settings
@@ -114,15 +132,13 @@ Save or load the entire mouse configuration including all settings, macros, and 
 General Syntax
 ^^^^^^^^^^^^^^
 
-DUMP ['FILE'|'-']
+dump 'FILE'|'-'
 
-LOAD ['FILE'|'-']
-
-
+load 'FILE'|'-'
 
 
-Author
-------
+Authors
+-------
 
 Dan Panzarella <alsoelp at gmail.com>
 
