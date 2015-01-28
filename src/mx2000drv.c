@@ -1,16 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <getopt.h>
 #include "usb.h"
 #include "mx.h"
 
 #define PROFILE_UNSET -1
+#define VB_PRINT(...) do { if (verbose){ fprintf(stderr, __VA_ARGS__); } } while (0)
 
 static void help(int status, char *program_name);
 
 int main(int argc, char **argv) {
 	int opt,
 		profile=PROFILE_UNSET,
+		verbose=0,
 		err;
 	char *command;
 	const char *short_opt = "hp:vV";
@@ -37,6 +40,7 @@ int main(int argc, char **argv) {
 				break;
 
 			case 'v':
+				verbose=1;
 				break;
 
 			case 'V':
@@ -74,6 +78,7 @@ int main(int argc, char **argv) {
 
 	if (profile == PROFILE_UNSET) {
 		profile = get_active_profile();
+		VB_PRINT("No profile provided, using active profile %d if needed\n", profile);
 	}
 
 
