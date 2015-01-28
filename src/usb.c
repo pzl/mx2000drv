@@ -19,7 +19,7 @@ int initialize_usb(void) {
 	if (libusb_has_capability(LIBUSB_CAP_HAS_CAPABILITY)){
 		if (libusb_has_capability(LIBUSB_CAP_HAS_HID_ACCESS) == 0){
 			fprintf(stderr, "Cannot access HID devices on this platform\n");
-			return -1;
+			return ERR_NO_HID;
 		}
 		if (libusb_has_capability(LIBUSB_CAP_SUPPORTS_DETACH_KERNEL_DRIVER) == 0) {
 			fprintf(stderr, "Warn: may not be able to detach kernel driver\n");
@@ -42,13 +42,13 @@ int find_device(void) {
 
 	if (handle != NULL){
 		fprintf(stderr, "Already active device\n");
-		return -2;
+		return 0;
 	}
 
 	count = libusb_get_device_list(NULL, &list);
 	if (count < 0){
 		fprintf(stderr, "Problem enumerating USB devices\n");
-		return -1;
+		return ERR_GET_DEVICE;
 	}
 
 	for (i=0; i < count; i++){
@@ -58,27 +58,29 @@ int find_device(void) {
 		}
 	}
 
-	if (mx) {
-		if (libusb_open(mx, &handle)){
-			fprintf(stderr, "Error opening mx device\n");
-			return -1;
-		}
-		if (libusb_set_auto_detach_kernel_driver(handle, 1) != LIBUSB_SUCCESS) {
-			fprintf(stderr, "Error setting automatic kernel detachment\n");
-		}
+	if (!mx) {
+		return ERR_NO_DEVICE;
 	}
-	printf("Opened mx device!\n");
+
+	if (libusb_open(mx, &handle)){
+		fprintf(stderr, "Error opening mx device\n");
+		return ERR_GET_DEVICE;
+	}
+	if (libusb_set_auto_detach_kernel_driver(handle, 1) != LIBUSB_SUCCESS) {
+		fprintf(stderr, "Error setting automatic kernel detachment\n");
+	}
 
 	if (libusb_kernel_driver_active(handle, MX_CONTROL_INTERFACE) == 1){
 		err = libusb_detach_kernel_driver(handle, MX_CONTROL_INTERFACE);
 		if (err < 0){
 			fprintf(stderr, "error detaching kernel driver: %s\n", libusb_strerror(err));
+			return ERR_KERNEL_DRIVER;
 		}
-	}
-
+	} 
 	err = libusb_claim_interface(handle, MX_CONTROL_INTERFACE);
 	if (err < 0){
 		fprintf(stderr, "error claiming interface %s\n", libusb_strerror(err));
+		return ERR_GET_DEVICE;
 	}
 	
 
@@ -99,7 +101,7 @@ int send_command(unsigned char *buf) {
 	/* Make sure we have a valid device handle */
 	if (handle == NULL){
 		fprintf(stderr, "No device open for controlling\n");
-		return -1;
+		return ERR_NO_DEVICE;
 	}
 
 	err = libusb_control_transfer(handle,
@@ -121,6 +123,12 @@ int read_back(unsigned char *buf){
 	int err,
 		nbytes_read;
 
+	/* Make sure we have a valid device handle */
+	if (handle == NULL){
+		fprintf(stderr, "No device open for controlling\n");
+		return ERR_NO_DEVICE;
+	}
+
 
 	err = libusb_interrupt_transfer(handle,
 	        LIBUSB_ENDPOINT_IN | 3,
@@ -129,12 +137,12 @@ int read_back(unsigned char *buf){
 
 	if (err < 0){
 		printf("readback error: %s\n", libusb_strerror(err));
-		return -1;
+		return ERR_CMD;
 	}
 
 	if (nbytes_read < 8){
 		fprintf(stderr, "Possible data underflow when receiving profile change acknowledgment. Got %d bytes back\n", nbytes_read);
-		return -2;
+		return ERR_CMD;
 	}
 
 	return 0;
