@@ -16,13 +16,15 @@
 
 
 
-
 typedef enum {
 	ADDR_READ = 0x04,
 	ADDR_WRITE = 0x54
 } AddrAction;
 
-int read_info(void);
+typedef int (*MXCommand)(int, char **);
+
+
+int read_info(int, char **);
 
 int read_addr(int profile, unsigned char addr, unsigned char *response);
 

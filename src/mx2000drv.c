@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
 		verbose=0,
 		err;
 	char *command;
+	MXCommand action;
 	const char *short_opt = "hp:vV";
 	struct option long_opt[] = {
 		{"help",	no_argument, NULL, 'h'},
@@ -67,22 +68,65 @@ int main(int argc, char **argv) {
 	}
 
 	/*
-		Find command
+		Parse command and arguments
 	*/
-	if (argc < 2){
+	if (argv[optind] == NULL){
+		fprintf(stderr, "A command is required. None provided\n");
 		help(-2,argv[0]);
 	}
+	command = argv[optind];
 
 
+	if (strcmp(command,"profile") == 0) {
+		
+	} else if (strcmp(command,"button") == 0 ) {
 
+	} else if (strcmp(command,"color") == 0 ) {
 
-	if (profile == PROFILE_UNSET) {
-		profile = get_active_profile();
-		VB_PRINT("No profile provided, using active profile %d if needed\n", profile);
+	} else if (strcmp(command,"macro") == 0 ) {
+
+	} else if (strcmp(command,"breathe") == 0 ) {
+
+	} else if (strcmp(command,"cycle") == 0 ) {
+
+	} else if (strcmp(command,"lit") == 0 ) {
+
+	} else if (strcmp(command,"dark") == 0 ) {
+
+	} else if (strcmp(command,"pulse") == 0 ) {
+
+	} else if (strcmp(command,"standby") == 0 ) {
+
+	} else if (strcmp(command,"backlight") == 0 ) {
+
+	} else if (strcmp(command,"sensitivity") == 0 ) {
+
+	} else if (strcmp(command,"accel") == 0 ) {
+
+	} else if (strcmp(command,"dpi") == 0 ) {
+
+	} else if (strcmp(command,"poll") == 0 ) {
+
+	} else if (strcmp(command,"reset") == 0 ) {
+
+	} else if (strcmp(command,"dump") == 0 ) {
+		action = read_info;
+	} else if (strcmp(command,"load") == 0 ) {
+
+	} else {
+		fprintf(stderr, "%s is not a valid command.\n", command);
+		exit(-2);
 	}
 
 
-	initialize_usb();
+	/*
+		Setup USB, get device, perform commands, and close up shop
+	*/
+	err = initialize_usb();
+	if (err < 0){
+		finish_usb();
+		return -1;
+	}
 
 	err = find_device();
 	if (err < 0){
@@ -90,10 +134,19 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 
-	read_info();
+	if (profile == PROFILE_UNSET) {
+		profile = get_active_profile();
+		VB_PRINT("No profile provided, using active profile %d if needed\n", profile);
+	}
+
+	err = action(argc - (optind+1), argv+(optind+1));
+	if (err < 0){
+		finish_usb();
+		return -1;
+	}
+
 
 	finish_usb();
-
 	return 0;
 }
 

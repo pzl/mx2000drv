@@ -17,7 +17,7 @@ int get_active_profile(void) {
 	return 0;
 }
 
-int read_info(void) {
+int read_info(int argc, char **argv) {
 	FILE *fp;
 	int err, i, j;
 	unsigned char *buf,
@@ -26,6 +26,9 @@ int read_info(void) {
 				  stg_read[MSG_LEN] = {
 		0xb3, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
+
+	(void) argc;
+	(void) argv;
 
 	buf = malloc(sizeof(unsigned char)*BUF_SIZE);
 
