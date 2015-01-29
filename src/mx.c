@@ -6,18 +6,19 @@
 
 
 
-int print_profile(int argc, char **argv) {
+MXCOMMAND(print_profile) {
 	unsigned char profile;
 
 	(void) argc;
 	(void) argv;
+	(void) target_profile;
 
 	profile = get_active_profile();
 	printf("%d\n", profile+1);
 	return 0;
 }
 
-int change_profile(int argc, char **argv) {
+MXCOMMAND(change_profile) {
 	long profile_l;
 	int err;
 	char *end;
@@ -27,6 +28,7 @@ int change_profile(int argc, char **argv) {
 		0xb3, 0x20, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 	(void) argc;
+	(void) target_profile;
 	
 	profile_l = strtol(argv[0], &end, 10);
 	if (*end != '\0') {
@@ -73,7 +75,7 @@ int change_profile(int argc, char **argv) {
 	return 0;
 }
 
-int read_info(int argc, char **argv) {
+MXCOMMAND(read_info) {
 	FILE *fp;
 	int err, i, j;
 	unsigned char *buf,
@@ -83,8 +85,7 @@ int read_info(int argc, char **argv) {
 		0xb3, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
-	(void) argc;
-	(void) argv;
+	(void) target_profile;
 
 
 	if (argc == 0 || argv[0][0]=='-'){

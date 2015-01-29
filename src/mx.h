@@ -21,15 +21,15 @@ typedef enum {
 	ADDR_WRITE = 0x54
 } AddrAction;
 
-typedef int (*MXCommand)(int, char **);
-
+typedef int (*MXCommand)(int, char **, int);
+#define MXCOMMAND(func_name) int func_name(int argc, char **argv, int target_profile)
 
 /*
 	User-facing commands
 */
-int read_info(int, char **);
-int print_profile(int, char **);
-int change_profile(int, char **);
+MXCOMMAND(read_info);
+MXCOMMAND(print_profile);
+MXCOMMAND(change_profile);
 
 /*
 	Helpers

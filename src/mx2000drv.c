@@ -152,7 +152,7 @@ int main(int argc, char **argv) {
 		VB_PRINT("No profile provided, using active profile %d if needed\n", (profile+1) );
 	}
 
-	err = action(argc - (optind+1), argv+(optind+1));
+	err = action(argc - (optind+1), argv+(optind+1), profile);
 	if (err < 0){
 		finish_usb();
 		return -1;
