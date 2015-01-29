@@ -1,0 +1,60 @@
+_mx2000drv() {
+	local cur prev commands opts
+	COMPREPLY=()
+	cur="${COMP_WORDS[COMP_CWORD]}"
+	prev="${COMP_WORDS[COMP_CWORD-1]}"
+	commands="profile button macro color breathe cycle lit dark pulse standby backlight sensitivity accel dpi poll reset dump load"
+	opts="-h --help -p --profile -v --verbose -V --version"
+
+
+	#arguments after initial command
+	case "${prev}" in
+		breathe|cycle|backlight)
+			COMPREPLY=( $(compgen -W "on off" -- ${cur}) )
+			return 0
+			;;
+		sensitivity)
+			COMPREPLY=( $(compgen -W "X Y" -- ${cur}) )
+			return 0
+			;;
+		poll)
+			COMPREPLY=( $(compgen -W "1000 500 250 125" -- ${cur}) )
+			return 0
+			;;
+		button|macro)
+			local buttons=$(seq -s' ' 8)
+			COMPREPLY=( $(compgen -W "${buttons}" -- ${cur}) )
+			return 0
+			;;
+		profile|dpi)
+			local count=$(seq -s' ' 4)
+			COMPREPLY=( $(compgen -W "${count}" -- ${cur}) )
+			return 0
+			;;
+		dump|load)
+			COMPREPLY=( $(compgen -f ${cur}) )
+			return 0
+			;;
+		*)
+			;;
+	esac
+
+	#tertiary arguments
+	if [[ $COMP_CWORD -ge 3 ]] && [[ "${COMP_WORDS[COMP_CWORD-2]}" == "dpi" ]]; then
+		local dpi=$(seq -s' ' 100 100 1600)
+		COMPREPLY=( $(compgen -W "${dpi}" -- ${cur}) )
+		return 0
+	fi
+
+	#options if dash is seen
+	if [[ ${cur} == -* ]]; then
+		COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+		return 0
+	fi
+
+
+	#default: the primary commands
+	COMPREPLY=( $(compgen -W "${commands}" -- ${cur}) )
+}
+
+complete -F _mx2000drv mx2000drv

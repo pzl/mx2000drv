@@ -23,7 +23,7 @@ BINDIR = $(DESTDIR)/$(PREFIX)/bin
 MANDIR = $(DESTDIR)/$(PREFIX)/share/man/man1
 BSHDIR = $(DESTDIR)/$(PREFIX)/share/bash-completion/completions
 ZSHDIR = $(DESTDIR)/$(PREFIX)/share/zsh/site-functions
-UDVDIR = $(DESTDIR)/etc/udev/rules.d
+UDVDIR = $(DESTDIR)/etc/extra/rules.d
 
 
 
@@ -52,13 +52,17 @@ $(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
 
 install:
 	install -D -m 755 $(TARGET) "$(BINDIR)/$(TARGET)"
-	install -D -m 644 udev/$(RULES) "$(UDVDIR)/$(RULES)"
 	install -D -m 644 doc/$(TARGET).1 "$(MANDIR)/$(TARGET).1"
+	install -D -m 644 extra/$(RULES) "$(UDVDIR)/$(RULES)"
+	install -D -m 644 extra/bash_completion "$(BSHDIR)/$(TARGET)"
+	#install -D -m 644 extra/zsh_completion "$(ZSHDIR)/_$(TARGET)"
 
 uninstall:
 	$(RM) "$(BINDIR)/$(TARGET)"
 	$(RM) "$(UDVDIR)/$(RULES)"
 	$(RM) "$(MANDIR)/$(TARGET).1"
+	$(RM) "$(BSHDIR)/$(TARGET)"
+	#$(RM) "$(ZSHDIR)/_$(TARGET)"
 
 test:
 	$(CC) -o test test/*.c
