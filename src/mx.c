@@ -367,6 +367,42 @@ int get_poll_rates(unsigned char *rates){
 	return 0;
 }
 
+int mouse_sleep(void) {
+	int err;
+	unsigned char response[MSG_LEN],
+				  command[MSG_LEN] = {
+		0xb3, 0x20, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00
+	};
+
+	err = send_command(command);
+	if (err < 0){
+		fprintf(stderr, "Error putting mouse to sleep\n");
+		return -1;
+	}
+	err = read_back(response);
+
+
+	return err;
+}
+
+int mouse_wake(void) {
+	int err;
+	unsigned char response[MSG_LEN],
+				  command[MSG_LEN] = {
+		0xb3, 0x20, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00
+	};
+
+	err = send_command(command);
+	if (err < 0){
+		fprintf(stderr, "Error waking mouse back up\n");
+		return -1;
+	}
+	err = read_back(response);
+
+
+	return err;
+}
+
 int read_section(unsigned char section_num, unsigned char *buf) {
 	int err, i;
 	unsigned char response[MSG_LEN];
@@ -384,4 +420,50 @@ int read_section(unsigned char section_num, unsigned char *buf) {
 	}
 
 	return err;
+}
+
+int erase_section(unsigned char section_num) {
+	int err;
+	unsigned char response[MSG_LEN],
+				  command[MSG_LEN] = {
+		0xb3, 0x03, 0x00, 0xff, 0x55, 0xaa, 0x55, 0x00
+	};
+
+	if (section_num == NUM_PROFILES || section_num > GLOBAL_PROFILE){
+		fprintf(stderr, "Error: section number for erasing is out of range: %02hx\n", section_num);
+		return -1;
+	}
+
+	command[2] = section_num;
+	command[3] = 0xff - section_num;
+
+
+	err = send_command(command);
+	if (err < 0){
+		fprintf(stderr, "Error erasing mouse section (command)\n");
+		return -1;
+	}
+	err = read_back(response);
+	if (err < 0){
+		fprintf(stderr, "Error erasing mouse section (response)\n");
+		return -1;
+	}
+
+
+	if (response[0] != 0xb3 ||
+	    response[1] != 0x03 ||
+	    response[2] != 0x01 ||
+	    response[4] != 0x00 ||
+	    response[5] != 0x00 ||
+	    response[6] != 0x00 ||
+	    response[7] != 0x00){
+		fprintf(stderr, "Warn: unknown extra data received when erasing section\n");
+	}
+
+	if (response[3] != 0x38 + section_num){
+		fprintf(stderr, "Error: mouse did not properly acknowledge correct section was erased\n");
+		return -1;
+	}
+
+	return 0;
 }

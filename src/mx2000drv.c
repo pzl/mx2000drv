@@ -77,6 +77,7 @@ int main(int argc, char **argv) {
 	command = argv[optind];
 
 
+
 	if (strcmp(command,"profile") == 0) {
 		if (optind == argc-1){
 			action = print_profile;
