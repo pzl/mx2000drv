@@ -121,11 +121,9 @@ MXCOMMAND(read_info) {
 
 
 	/* read polling rates */
-	stg_read[1] = 0x22;
-	err = send_command(stg_read);
-	err = read_back(response);
-	memcpy(bufp, response+3, 2);
-	bufp +=2;
+	err = get_poll_rates(response);
+	memcpy(bufp, response, 2);
+	bufp += 2;
 
 	/* get active profile */
 	*bufp = get_active_profile();
