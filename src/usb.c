@@ -113,7 +113,7 @@ int send_command(unsigned char *buf) {
 	        8,														/* data length */
 	        0);														/* timeout */
 	if (err < 0){
-		printf("control error: %s\n", libusb_strerror(err));
+		fprintf(stderr, "control error: %s\n", libusb_strerror(err));
 		return -2;
 	}
 	return 0;
@@ -136,7 +136,7 @@ int read_back(unsigned char *buf){
 	        &nbytes_read, 1000);
 
 	if (err < 0){
-		printf("readback error: %s\n", libusb_strerror(err));
+		fprintf(stderr, "readback error: %s\n", libusb_strerror(err));
 		return ERR_CMD;
 	}
 
