@@ -5,26 +5,72 @@
 #include "mx.h"
 
 
-unsigned char get_active_profile(void) {
+
+int print_profile(int argc, char **argv) {
+	unsigned char profile;
+
+	(void) argc;
+	(void) argv;
+
+	profile = get_active_profile();
+	printf("%d\n", profile+1);
+	return 0;
+}
+
+int change_profile(int argc, char **argv) {
+	long profile_l;
 	int err;
+	char *end;
+	unsigned char profile_uc;
 	unsigned char response[MSG_LEN],
 				  command[MSG_LEN] = {
-		0xb3, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+		0xb3, 0x20, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
+	(void) argc;
+	
+	profile_l = strtol(argv[0], &end, 10);
+	if (*end != '\0') {
+		fprintf(stderr, "Error: failed to change profile, input was not single int 1-4\n");
+		return -1;
+	}
+
+	if (profile_l < 1 || profile_l > 4){
+		fprintf(stderr, "Error: profile number must be between 1 and 4, inclusive\n");
+		return -1;
+	}
+
+	/* range checks already done since we force 1-4 range above */
+	profile_uc = (unsigned char) (profile_l - 1);
+	command[3] = profile_uc;
+
 
 	err = send_command(command);
 	if (err < 0){
 		fprintf(stderr, "Error getting active mouse profile\n");
-		return 0;
+		return -1;
 	}
 	err = read_back(response);
 	if (err < 0){
 		fprintf(stderr, "Error getting active mouse profile\n");
-		return 0;
+		return -1;
 	}
 
-	return (response[4] >> 4) ;
+	if ( (response[4] >> 4) != profile_uc) {
+		fprintf(stderr, "Error setting profile: mouse did not acknowledge change\n");
+		return -1;
+	}
 
+	if (response[0] != 0xb3 ||
+	    response[1] != 0x20 ||
+	    response[2] != 0x00 ||
+	    response[5] != 0x00 ||
+	    response[6] != 0x0e ||
+	    response[7] != 0x0f){
+		fprintf(stderr, "Warn: mouse profile may have changed, but got unknown response\n");
+	}
+
+
+	return 0;
 }
 
 int read_info(int argc, char **argv) {
@@ -104,6 +150,12 @@ int read_info(int argc, char **argv) {
 
 }
 
+
+/*
+		Helper functions,
+		not necessarily outside commands
+*/
+
 int read_addr(int profile, unsigned char addr, unsigned char *response){
 	int err;
 	unsigned char command[MSG_LEN] = {
@@ -118,5 +170,27 @@ int read_addr(int profile, unsigned char addr, unsigned char *response){
 
 
 	return err;
+
+}
+
+unsigned char get_active_profile(void) {
+	int err;
+	unsigned char response[MSG_LEN],
+				  command[MSG_LEN] = {
+		0xb3, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+	};
+
+	err = send_command(command);
+	if (err < 0){
+		fprintf(stderr, "Error getting active mouse profile\n");
+		return 0;
+	}
+	err = read_back(response);
+	if (err < 0){
+		fprintf(stderr, "Error getting active mouse profile\n");
+		return 0;
+	}
+
+	return (response[4] >> 4) ;
 
 }

@@ -78,7 +78,20 @@ int main(int argc, char **argv) {
 
 
 	if (strcmp(command,"profile") == 0) {
-
+		if (optind == argc-1){
+			action = print_profile;
+		} else if (optind == argc-2){
+			unsigned char p = (unsigned char) atoi(argv[optind+1]);
+			if (p > 0 && p <= 4) {
+				action = change_profile;
+			} else {
+				fprintf(stderr, "Error: Profile number must be 1-4\n");
+				help(-2,argv[0]);
+			}
+		} else {
+			fprintf(stderr, "invalid number of arguments for 'profile' command\n");
+			help(-2,argv[0]);
+		}
 	} else if (strcmp(command,"button") == 0 ) {
 
 	} else if (strcmp(command,"color") == 0 ) {
@@ -115,7 +128,7 @@ int main(int argc, char **argv) {
 
 	} else {
 		fprintf(stderr, "%s is not a valid command.\n", command);
-		exit(-2);
+		help(-2, argv[0]);
 	}
 
 

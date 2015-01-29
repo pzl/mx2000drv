@@ -24,10 +24,17 @@ typedef enum {
 typedef int (*MXCommand)(int, char **);
 
 
+/*
+	User-facing commands
+*/
 int read_info(int, char **);
+int print_profile(int, char **);
+int change_profile(int, char **);
 
+/*
+	Helpers
+*/
 int read_addr(int profile, unsigned char addr, unsigned char *response);
-
 unsigned char get_active_profile(void);
 
 
