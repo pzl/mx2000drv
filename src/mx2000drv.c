@@ -34,8 +34,8 @@ int main(int argc, char **argv) {
 		switch (opt) {
 			case 'p':
 				profile = atoi(optarg);
-				if (profile < 0 || profile > 4){
-					fprintf(stderr, "Profile %s out of range (0-4)\n", optarg);
+				if (profile < 1 || profile > 4){
+					fprintf(stderr, "Profile %s out of range (1-4)\n", optarg);
 					help(-2,argv[0]);
 				}
 				break;
@@ -92,6 +92,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "invalid number of arguments for 'profile' command\n");
 			help(-2,argv[0]);
 		}
+
 	} else if (strcmp(command,"button") == 0 ) {
 
 	} else if (strcmp(command,"color") == 0 ) {
@@ -119,6 +120,22 @@ int main(int argc, char **argv) {
 	} else if (strcmp(command,"dpi") == 0 ) {
 
 	} else if (strcmp(command,"poll") == 0 ) {
+		if (optind == argc -1){
+			action = print_poll;
+		} else if (optind == argc-2) {
+			if (strcmp(argv[optind+1],"1000") == 0 ||
+			    strcmp(argv[optind+1],"500") == 0 ||
+			    strcmp(argv[optind+1],"250") == 0 ||
+			    strcmp(argv[optind+1],"125") == 0) {
+				action = change_poll;
+			} else {
+				fprintf(stderr, "Invalid polling rate '%s'. Must be one of: 1000,500,250,125\n", argv[optind+1]);
+				exit(-2);
+			}
+		} else {
+			fprintf(stderr, "invalid number of arguments for 'poll' command\n");
+			help(-2,argv[0]);
+		}
 
 	} else if (strcmp(command,"reset") == 0 ) {
 
@@ -148,11 +165,11 @@ int main(int argc, char **argv) {
 	}
 
 	if (profile == PROFILE_UNSET) {
-		profile = get_active_profile();
-		VB_PRINT("No profile provided, using active profile %d if needed\n", (profile+1) );
+		profile = get_active_profile()+1;
+		VB_PRINT("No profile provided, using active profile %d if needed\n", profile );
 	}
 
-	err = action(argc - (optind+1), argv+(optind+1), profile);
+	err = action(argc - (optind+1), argv+(optind+1), profile-1);
 	if (err < 0){
 		finish_usb();
 		return -1;

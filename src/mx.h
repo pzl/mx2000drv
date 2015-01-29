@@ -30,12 +30,15 @@ typedef int (*MXCommand)(int, char **, int);
 MXCOMMAND(read_info);
 MXCOMMAND(print_profile);
 MXCOMMAND(change_profile);
+MXCOMMAND(print_poll);
+MXCOMMAND(change_poll);
 
 /*
 	Helpers
 */
 int read_addr(int profile, unsigned char addr, unsigned char *response);
 unsigned char get_active_profile(void);
+int get_poll_rates(unsigned char *);
 
 
 #endif
