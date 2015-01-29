@@ -5,16 +5,26 @@
 #include "mx.h"
 
 
-int get_active_profile(void) {
-	/*
+unsigned char get_active_profile(void) {
 	int err;
-	unsigned char *command[MSG_LEN] = {
-		0xb3
+	unsigned char response[MSG_LEN],
+				  command[MSG_LEN] = {
+		0xb3, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+	};
+
+	err = send_command(command);
+	if (err < 0){
+		fprintf(stderr, "Error getting active mouse profile\n");
+		return 0;
+	}
+	err = read_back(response);
+	if (err < 0){
+		fprintf(stderr, "Error getting active mouse profile\n");
+		return 0;
 	}
 
-	err = send_command()
-	*/
-	return 0;
+	return (response[4] >> 4) ;
+
 }
 
 int read_info(int argc, char **argv) {
@@ -75,7 +85,7 @@ int read_info(int argc, char **argv) {
 	bufp +=2;
 
 	/* get active profile */
-	*bufp = 0;
+	*bufp = get_active_profile();
 
 	fwrite(buf, sizeof(unsigned char), BUF_SIZE, fp);
 

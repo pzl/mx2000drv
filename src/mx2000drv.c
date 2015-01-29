@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
 
 
 	if (strcmp(command,"profile") == 0) {
-		
+
 	} else if (strcmp(command,"button") == 0 ) {
 
 	} else if (strcmp(command,"color") == 0 ) {
@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
 
 	if (profile == PROFILE_UNSET) {
 		profile = get_active_profile();
-		VB_PRINT("No profile provided, using active profile %d if needed\n", profile);
+		VB_PRINT("No profile provided, using active profile %d if needed\n", (profile+1) );
 	}
 
 	err = action(argc - (optind+1), argv+(optind+1));
