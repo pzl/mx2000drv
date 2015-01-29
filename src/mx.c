@@ -77,7 +77,7 @@ MXCOMMAND(change_profile) {
 
 MXCOMMAND(read_info) {
 	FILE *fp;
-	int err, i, j;
+	int err, i;
 	unsigned char *buf,
 				  *bufp,
 				  response[MSG_LEN],
@@ -104,18 +104,14 @@ MXCOMMAND(read_info) {
 
 	/* read macro memory */
 	for (i=0; i<NUM_PROFILES; i++){
-		for (j=ADDR_START; j<=ADDR_STOP; j+=ADDR_STEP){
-			err = read_addr(i,(unsigned char)j,response);
-			memcpy(bufp, response+4, ADDR_DATA_LEN);
-			bufp += ADDR_DATA_LEN;
-		}
+		read_section(i,bufp);
+		bufp += ADDR_DATA_LEN * (ADDR_STOP/ADDR_STEP + 1);
 	}
+
 	/* read settings memory */
-	for (j=ADDR_START; j<=ADDR_STOP; j+=ADDR_STEP){
-		err = read_addr(5,(unsigned char)j,response);
-		memcpy(bufp, response+4, ADDR_DATA_LEN);
-		bufp += ADDR_DATA_LEN;
-	}
+	read_section(GLOBAL_PROFILE, bufp);
+	bufp += ADDR_DATA_LEN * (ADDR_STOP/ADDR_STEP + 1);
+
 
 	/* read DPI settings */
 	err = send_command(stg_read);
@@ -371,4 +367,23 @@ int get_poll_rates(unsigned char *rates){
 	rates[1] = response[4];
 
 	return 0;
+}
+
+int read_section(unsigned char section_num, unsigned char *buf) {
+	int err, i;
+	unsigned char response[MSG_LEN];
+
+	if (section_num == NUM_PROFILES || section_num > GLOBAL_PROFILE) {
+		fprintf(stderr, "Error: section number for reading is out of range: %02hx\n", section_num);
+		return -1;
+	}
+
+	/* read settings memory */
+	for (i=ADDR_START; i<=ADDR_STOP; i+=ADDR_STEP){
+		err = read_addr(section_num,(unsigned char)i,response);
+		memcpy(buf, response+4, ADDR_DATA_LEN);
+		buf += ADDR_DATA_LEN;
+	}
+
+	return err;
 }

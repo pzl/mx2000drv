@@ -39,6 +39,7 @@ MXCOMMAND(change_poll);
 int read_addr(int profile, unsigned char addr, unsigned char *response);
 unsigned char get_active_profile(void);
 int get_poll_rates(unsigned char *);
+int read_section(unsigned char section_num, unsigned char *buf);
 
 
 #endif
