@@ -294,10 +294,8 @@ MXCOMMAND(change_poll) {
 int read_addr(int profile, unsigned char addr, unsigned char *response){
 	int err;
 	unsigned char command[MSG_LEN] = {
-		0xb3, 0x02, 0x00, ADDR_READ, 0x00, 0x00, 0x00, 0x00
+		0xb3, 0x02, addr, 0x04, 0x00, 0x00, 0x00, 0x00
 	};
-
-	command[2] = addr;
 	command[4] = (unsigned char) profile;
 
 	err = send_command(command);
@@ -307,6 +305,51 @@ int read_addr(int profile, unsigned char addr, unsigned char *response){
 	return err;
 
 }
+int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf) {
+	int err;
+	unsigned char response[MSG_LEN],
+				  command[MSG_LEN] = {
+		0xb3, 0x01, addr, 0x04, 0x00, 0x00, 0x00, 0x00
+	};
+
+	if (profile == NUM_PROFILES || profile > GLOBAL_PROFILE) {
+		fprintf(stderr, "Error: invalid section number to write to\n");
+		return -1;
+	}
+
+	command[3] |= profile << 4;
+
+	err = send_command(command);
+	if (err < 0){
+		fprintf(stderr, "Error writing to addr (command)\n");
+		return -1;
+	}
+	err = read_back(response);
+	if (err < 0){
+		fprintf(stderr, "Error writing to addr (response)\n");
+		return -1;
+	}
+
+
+	if (response[0] != 0xb3 ||
+	    response[1] != 0x01 ||
+	    response[2] != 0x01){
+		fprintf(stderr, "Warn: unknown extra data received when writing addr\n");
+	}
+
+	if (response[3] != 0x38 + profile ||
+	    response[4] != buf[0] ||
+	    response[5] != buf[1] ||
+	    response[6] != buf[2] ||
+	    response[7] != buf[3]){
+		fprintf(stderr, "Error: mouse did not properly write data to addr\n");
+		return -1;
+	}
+
+	return err;
+}
+
+
 
 unsigned char get_active_profile(void) {
 	int err;

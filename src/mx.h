@@ -15,12 +15,6 @@
 #define ADDR_STEP 0x04
 
 
-
-typedef enum {
-	ADDR_READ = 0x04,
-	ADDR_WRITE = 0x54
-} AddrAction;
-
 typedef int (*MXCommand)(int, char **, int);
 #define MXCOMMAND(func_name) int func_name(int argc, char **argv, int target_profile)
 
@@ -37,6 +31,7 @@ MXCOMMAND(change_poll);
 	Helpers
 */
 int read_addr(int profile, unsigned char addr, unsigned char *response);
+int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf);
 unsigned char get_active_profile(void);
 int get_poll_rates(unsigned char *);
 int mouse_sleep(void);
