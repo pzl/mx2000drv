@@ -286,6 +286,45 @@ MXCOMMAND(change_poll) {
 }
 
 
+MXCOMMAND(load_info) {
+	FILE *fp;
+	int err;
+	size_t len;
+	unsigned char *buf;
+
+	(void) target_profile;
+
+	if (argc == 0 || argv[0][0] == '-') {
+		freopen(NULL, "rb", stdin);
+		fp = stdin;
+	} else {
+		fp = fopen(argv[0],"rb");
+		if (fp == NULL) {
+			fprintf(stderr, "Error opening file for reading\n");
+			return -1;
+		}
+	}
+
+	buf = malloc(sizeof(unsigned char)*BUF_SIZE);
+
+	len = fread(buf, sizeof(unsigned char), BUF_SIZE, fp);
+	if (len != BUF_SIZE) {
+		fprintf(stderr, "Warn: possible data underflow when loading file\n");
+	}
+
+	err = write_buf(buf);
+	if (err < 0){
+		fprintf(stderr, "Error writing file to memory\n");
+	}
+
+	if (fp != stdin){
+		fclose(fp);
+	}
+	free(buf);
+	return err;
+}
+
+
 /*
 		Helper functions,
 		not necessarily outside commands

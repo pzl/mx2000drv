@@ -22,6 +22,7 @@ typedef int (*MXCommand)(int, char **, int);
 	User-facing commands
 */
 MXCOMMAND(read_info);
+MXCOMMAND(load_info);
 MXCOMMAND(print_profile);
 MXCOMMAND(change_profile);
 MXCOMMAND(print_poll);

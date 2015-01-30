@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
 	} else if (strcmp(command,"dump") == 0 ) {
 		action = read_info;
 	} else if (strcmp(command,"load") == 0 ) {
-
+		action = load_info;
 	} else {
 		fprintf(stderr, "%s is not a valid command.\n", command);
 		help(-2, argv[0]);
