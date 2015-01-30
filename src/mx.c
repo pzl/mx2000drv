@@ -318,6 +318,10 @@ int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf) {
 	}
 
 	command[3] |= profile << 4;
+	command[4] = buf[0];
+	command[5] = buf[1];
+	command[6] = buf[2];
+	command[7] = buf[3];
 
 	err = send_command(command);
 	if (err < 0){
