@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 	}
 	command = argv[optind];
 
-
+	action = NULL;
 
 	if (strcmp(command,"profile") == 0) {
 		if (optind == argc-1){
@@ -147,6 +147,11 @@ int main(int argc, char **argv) {
 	} else {
 		fprintf(stderr, "%s is not a valid command.\n", command);
 		help(-2, argv[0]);
+	}
+
+	if (action == NULL){
+		fprintf(stderr, "Command not found or not implemented\n");
+		return -1;
 	}
 
 
