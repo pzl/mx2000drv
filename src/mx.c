@@ -216,8 +216,82 @@ MXCOMMAND(get_backlight) {
 	}
 
 	return 0;
-
 }
+
+MXCOMMAND(get_cycle) {
+	int err;
+	unsigned char addr;
+	unsigned char response[MSG_LEN];
+
+	(void) argc;
+	(void) argv;
+
+	addr = COLOR_ADDR;
+	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
+
+	err = read_addr(GLOBAL_PROFILE,addr,response);
+	if (err < 0){
+		fprintf(stderr, "Error reading backlight info\n");
+		return -1;
+	}
+
+	if (response[4] & CYCLE_ENABLED_MSK) {
+		printf("on\n");
+	} else {
+		printf("off\n");
+	}
+
+	return 0;
+}
+
+MXCOMMAND(get_color) {
+	int err;
+	unsigned char addr;
+	unsigned char response[MSG_LEN];
+
+	(void) argc;
+	(void) argv;
+
+	addr = COLOR_ADDR;
+	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
+
+	err = read_addr(GLOBAL_PROFILE,addr,response);
+	if (err < 0){
+		fprintf(stderr, "Error reading backlight info\n");
+		return -1;
+	}
+
+	printf("%02hx%02hx%02hx\n", response[5],response[6],response[7]);
+
+	return 0;
+}
+
+MXCOMMAND(get_breathe) {
+	int err;
+	unsigned char addr;
+	unsigned char response[MSG_LEN];
+
+	(void) argc;
+	(void) argv;
+
+	addr = COLOR_ADDR;
+	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
+
+	err = read_addr(GLOBAL_PROFILE,addr,response);
+	if (err < 0){
+		fprintf(stderr, "Error reading breathe info\n");
+		return -1;
+	}
+
+	if (response[4] & BREATHE_ENABLED_MSK) {
+		printf("on\n");
+	} else {
+		printf("off\n");
+	}
+
+	return 0;
+}
+
 
 MXCOMMAND(change_poll) {
 	int err;

@@ -97,13 +97,19 @@ int main(int argc, char **argv) {
 	} else if (strcmp(command,"button") == 0 ) {
 
 	} else if (strcmp(command,"color") == 0 ) {
-
+		if (optind == argc -1) {
+			action = get_color;
+		}
 	} else if (strcmp(command,"macro") == 0 ) {
 
 	} else if (strcmp(command,"breathe") == 0 ) {
-
+		if (optind == argc -1) {
+			action = get_breathe;
+		}
 	} else if (strcmp(command,"cycle") == 0 ) {
-
+		if (optind == argc -1) {
+			action = get_cycle;
+		}
 	} else if (strcmp(command,"lit") == 0 ) {
 
 	} else if (strcmp(command,"dark") == 0 ) {

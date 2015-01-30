@@ -34,6 +34,8 @@
 
 
 #define BACKLIGHT_ENABLED_MSK (1 << 7)
+#define BREATHE_ENABLED_MSK 0x70
+#define CYCLE_ENABLED_MSK 0x0F
 
 
 typedef int (*MXCommand)(int, char **, int);
@@ -88,6 +90,9 @@ MXCOMMAND(change_profile);
 MXCOMMAND(print_poll);
 MXCOMMAND(change_poll);
 MXCOMMAND(get_backlight);
+MXCOMMAND(get_cycle);
+MXCOMMAND(get_color);
+MXCOMMAND(get_breathe);
 
 /*
 	Helpers
