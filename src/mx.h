@@ -15,6 +15,23 @@
 #define ADDR_STEP 0x04
 
 
+/* gap between repeated settings for next profile */
+#define SETTING_ADDR_PROFILE_STEP 0x08
+#define BUTTON_ADDR_PROFILE_STEP 0x20
+
+
+#define BUTTON_ADDR_START 0x00
+#define MACRO_ADDR_START 0x18
+#define MACRO_OVERFLOW_ADDR_START 0x1C
+#define BUTTON_ADDR_STEP 0x04
+
+/* First profile addr of each setting */
+#define COLOR_ADDR 0x80
+#define COLOR_TIME_ADDR 0x84
+#define SENSITIVITY_ADDR 0xC4
+#define DPI_VAL_ADDR 0xE0
+
+
 typedef int (*MXCommand)(int, char **, int);
 #define MXCOMMAND(func_name) int func_name(int argc, char **argv, int target_profile)
 
