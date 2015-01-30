@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
 		}
 
 	} else if (strcmp(command,"reset") == 0 ) {
-
+		action = factory_reset;
 	} else if (strcmp(command,"dump") == 0 ) {
 		action = read_info;
 	} else if (strcmp(command,"load") == 0 ) {

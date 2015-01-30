@@ -325,6 +325,37 @@ MXCOMMAND(load_info) {
 }
 
 
+MXCOMMAND(factory_reset) {
+	int err;
+	unsigned char *buf, *bufp;
+
+	(void)argc;
+	(void)argv;
+	(void)target_profile;
+
+	buf = malloc(sizeof(unsigned char)*BUF_SIZE);
+	bufp = buf;
+
+	/* all macro memory is blank */
+	memset(bufp,0xFF, (ADDR_STOP/ADDR_STEP+1)*ADDR_DATA_LEN*NUM_PROFILES);
+	bufp += (ADDR_STOP/ADDR_STEP+1)*ADDR_DATA_LEN*NUM_PROFILES;
+
+	memcpy(bufp, factory_settings, (ADDR_STOP/ADDR_STEP+1)*ADDR_DATA_LEN);
+	bufp += (ADDR_STOP/ADDR_STEP+1)*ADDR_DATA_LEN;
+
+	*bufp++ = 0x00; /* DPI */
+	*bufp++ = 0x00;
+	*bufp++ = 0x33; /* poll rate */
+	*bufp++ = 0x33;
+	*bufp = 0x00;   /* active profile */
+
+	err = write_buf(buf);
+
+	free(buf);
+	return err;
+}
+
+
 /*
 		Helper functions,
 		not necessarily outside commands
