@@ -113,7 +113,9 @@ int main(int argc, char **argv) {
 	} else if (strcmp(command,"standby") == 0 ) {
 
 	} else if (strcmp(command,"backlight") == 0 ) {
-
+		if (optind == argc -1) {
+			action = get_backlight;
+		}
 	} else if (strcmp(command,"sensitivity") == 0 ) {
 
 	} else if (strcmp(command,"accel") == 0 ) {

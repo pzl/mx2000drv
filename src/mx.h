@@ -32,6 +32,10 @@
 #define DPI_VAL_ADDR 0xE0
 
 
+
+#define BACKLIGHT_ENABLED_MSK (1 << 7)
+
+
 typedef int (*MXCommand)(int, char **, int);
 #define MXCOMMAND(func_name) int func_name(int argc, char **argv, int target_profile)
 
@@ -83,6 +87,7 @@ MXCOMMAND(print_profile);
 MXCOMMAND(change_profile);
 MXCOMMAND(print_poll);
 MXCOMMAND(change_poll);
+MXCOMMAND(get_backlight);
 
 /*
 	Helpers

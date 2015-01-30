@@ -192,6 +192,33 @@ MXCOMMAND(print_poll) {
 }
 
 
+MXCOMMAND(get_backlight) {
+	int err;
+	unsigned char addr;
+	unsigned char response[MSG_LEN];
+
+	(void) argc;
+	(void) argv;
+
+	addr = COLOR_ADDR;
+	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
+
+	err = read_addr(GLOBAL_PROFILE,addr,response);
+	if (err < 0){
+		fprintf(stderr, "Error reading backlight info\n");
+		return -1;
+	}
+
+	if (response[4] & BACKLIGHT_ENABLED_MSK) {
+		printf("on\n");
+	} else {
+		printf("off\n");
+	}
+
+	return 0;
+
+}
+
 MXCOMMAND(change_poll) {
 	int err;
 	long poll_l;
