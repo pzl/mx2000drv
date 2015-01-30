@@ -38,6 +38,6 @@ int mouse_sleep(void);
 int mouse_wake(void);
 int read_section(unsigned char section_num, unsigned char *buf);
 int erase_section(unsigned char section_num);
-
+int write_buf(unsigned char *buf);
 
 #endif

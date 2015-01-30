@@ -514,3 +514,68 @@ int erase_section(unsigned char section_num) {
 
 	return 0;
 }
+
+int write_buf(unsigned char *buf) {
+	int err, i, j;
+	unsigned char response[MSG_LEN],
+				  command[MSG_LEN] = {
+		0xb3, 0x21, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00
+	};
+
+	err = mouse_sleep();
+	if (err < 0){
+		fprintf(stderr, "Error trying to put mouse to sleep\n");
+		mouse_wake();
+	}
+
+	/* write macro sections */
+	for (i=0; i<NUM_PROFILES; i++){
+		err = erase_section((unsigned char) i);
+		if (err < 0 ) {
+			fprintf(stderr, "Error erasing section when trying to write buffer\n");
+		}
+
+		for (j=0; j<=ADDR_STOP; j+=ADDR_STEP) {
+			err = write_addr((unsigned char) i, (unsigned char) j, buf);
+			if (err < 0){
+				fprintf(stderr, "Error writing %d-0x%02hx\n", i,j);
+			}
+			buf += ADDR_DATA_LEN;
+		}
+	}
+	/* write settings section */
+	err = erase_section(GLOBAL_PROFILE);
+	if (err < 0 ) {
+		fprintf(stderr, "Error erasing settings section when trying to write buffer\n");
+	}
+	for (j=0; j<=ADDR_STOP; j+=ADDR_STEP) {
+		err = write_addr(5, (unsigned char) j, buf);
+		if (err < 0){
+			fprintf(stderr, "Error writing 5-0x%02hx\n", j);
+		}
+		buf += ADDR_DATA_LEN;
+	}
+
+	err = mouse_wake();
+	if (err < 0){
+		fprintf(stderr, "Error trying to wake mouse up\n");
+	}
+
+	/* DPI */
+	command[3] = *buf++;
+	command[4] = *buf++;
+	err = send_command(command);
+	err = read_back(response);
+
+	/* poll rate */
+	command[1] = 0x22;
+	command[3] = *buf++;
+	command[4] = *buf++;
+	/* @todo: write poll rate */
+
+	/* current profile */
+	/* @todo: change profile */
+
+
+	return err;
+}
