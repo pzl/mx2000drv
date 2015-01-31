@@ -111,13 +111,21 @@ int main(int argc, char **argv) {
 			action = get_cycle;
 		}
 	} else if (strcmp(command,"lit") == 0 ) {
-
+		if (optind == argc -1) {
+			action = get_lit_time;
+		}
 	} else if (strcmp(command,"dark") == 0 ) {
-
+		if (optind == argc -1) {
+			action = get_dark_time;
+		}
 	} else if (strcmp(command,"pulse") == 0 ) {
-
+		if (optind == argc -1) {
+			action = get_pulse_time;
+		}
 	} else if (strcmp(command,"standby") == 0 ) {
-
+		if (optind == argc -1) {
+			action = get_standby_time;
+		}
 	} else if (strcmp(command,"backlight") == 0 ) {
 		if (optind == argc -1) {
 			action = get_backlight;

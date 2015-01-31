@@ -292,6 +292,99 @@ MXCOMMAND(get_breathe) {
 	return 0;
 }
 
+MXCOMMAND(get_lit_time) {
+	int err, value;
+	unsigned char addr;
+	unsigned char response[MSG_LEN];
+
+	(void) argc;
+	(void) argv;
+
+	addr = COLOR_TIME_ADDR;
+	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
+
+	err = read_addr(GLOBAL_PROFILE,addr,response);
+	if (err < 0){
+		fprintf(stderr, "Error reading breathe info\n");
+		return -1;
+	}
+
+	value = (response[5] & LIT_TIME_MSK) >> 4;
+	value = (value-1)*1.5 + 1;
+	printf("%d\n", value);
+
+	return 0;
+}
+
+MXCOMMAND(get_dark_time) {
+	int err, value;
+	unsigned char addr;
+	unsigned char response[MSG_LEN];
+
+	(void) argc;
+	(void) argv;
+
+	addr = COLOR_TIME_ADDR;
+	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
+
+	err = read_addr(GLOBAL_PROFILE,addr,response);
+	if (err < 0){
+		fprintf(stderr, "Error reading breathe info\n");
+		return -1;
+	}
+
+	value = response[5] & DARK_TIME_MSK;
+	value = (value-1)*1.5+1;
+	printf("%d\n", value);
+
+	return 0;
+}
+MXCOMMAND(get_pulse_time) {
+	int err;
+	unsigned char addr, value;
+	unsigned char response[MSG_LEN];
+
+	(void) argc;
+	(void) argv;
+
+	addr = COLOR_TIME_ADDR;
+	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
+
+	err = read_addr(GLOBAL_PROFILE,addr,response);
+	if (err < 0){
+		fprintf(stderr, "Error reading breathe info\n");
+		return -1;
+	}
+
+	value = response[4]/0x04;
+	printf("%d\n", value);
+
+	return 0;
+}
+MXCOMMAND(get_standby_time) {
+	int err, value;
+	unsigned char addr;
+	unsigned char response[MSG_LEN];
+
+	(void) argc;
+	(void) argv;
+
+	addr = COLOR_TIME_ADDR;
+	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
+
+	err = read_addr(GLOBAL_PROFILE,addr,response);
+	if (err < 0){
+		fprintf(stderr, "Error reading breathe info\n");
+		return -1;
+	}
+
+	value = (response[6]/0x04-1)*1.5+1;
+	printf("%d\n", value);
+
+	return 0;
+}
+
+
 
 MXCOMMAND(change_poll) {
 	int err;
