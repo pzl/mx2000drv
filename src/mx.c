@@ -289,29 +289,51 @@ MXCOMMAND(lit_time) {
 	return 0;
 }
 
-MXCOMMAND(get_dark_time) {
-	int err, value;
-	unsigned char addr;
-	unsigned char response[MSG_LEN];
-
-	(void) argc;
-	(void) argv;
+MXCOMMAND(dark_time) {
+	int err;
+	unsigned char addr, value;
+	unsigned char buf[MSG_LEN];
 
 	addr = COLOR_TIME_ADDR;
 	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
 
-	err = read_addr(GLOBAL_PROFILE,addr,response);
+	err = read_addr(GLOBAL_PROFILE,addr,buf);
 	if (err < 0){
 		fprintf(stderr, "Error reading dark info\n");
 		return -1;
 	}
 
-	value = response[5] & DARK_TIME_MSK;
-	value = (value-1)*1.5+1;
-	printf("%d\n", value);
+	if (argc == 0) {
+		value = buf[5] & DARK_TIME_MSK;
+		printf("%d\n", value);
+	} else {
+		unsigned long val_ul;
+		char *end;
+		val_ul = strtoul(argv[0],&end,10);
+		if (*end != '\0') {
+			fprintf(stderr, "Error: failed to parse numeric input for dark time\n");
+			return -1;
+		}
 
+		if (val_ul > 15) {
+			fprintf(stderr, "Error: dark time out of range (0-15)\n");
+			return -1;
+		}
+		value = (unsigned char) val_ul;
+
+		buf[5] &= ~(DARK_TIME_MSK); /* clear higher 4 bits */
+		buf[5] |= value;
+
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		if (err < 0){
+			fprintf(stderr, "Error writing dark info\n");
+			return -1;
+		}	
+	}
 	return 0;
 }
+
+
 MXCOMMAND(get_pulse_time) {
 	int err;
 	unsigned char addr, value;

@@ -160,8 +160,15 @@ int main(int argc, char **argv) {
 			}
 		}
 	} else if (strcmp(command,"dark") == 0 ) {
-		if (n_addtl_cmds == 0) {
-			action = get_dark_time;
+		action = dark_time;
+		if (n_addtl_cmds > 1) {
+			fprintf(stderr, "Invalid number of arguments for dark command.\n");
+			HELP(-2);
+		} else if (n_addtl_cmds == 1) {
+			if (atoi(sec_cmd) > 15) {
+				fprintf(stderr, "Error: Maximum time is 15\n");
+				exit(-2);
+			}
 		}
 	} else if (strcmp(command,"pulse") == 0 ) {
 		if (n_addtl_cmds == 0) {
