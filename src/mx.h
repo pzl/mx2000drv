@@ -97,7 +97,7 @@ MXCOMMAND(backlight);
 MXCOMMAND(cycle);
 MXCOMMAND(color);
 MXCOMMAND(breathe);
-MXCOMMAND(get_lit_time);
+MXCOMMAND(lit_time);
 MXCOMMAND(get_dark_time);
 MXCOMMAND(get_pulse_time);
 MXCOMMAND(get_standby_time);

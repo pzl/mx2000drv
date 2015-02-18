@@ -149,8 +149,15 @@ int main(int argc, char **argv) {
 			}
 		}
 	} else if (strcmp(command,"lit") == 0 ) {
-		if (n_addtl_cmds == 0) {
-			action = get_lit_time;
+		action = lit_time;
+		if (n_addtl_cmds > 1) {
+			fprintf(stderr, "Invalid number of arguments for lit command.\n");
+			HELP(-2);
+		} else if (n_addtl_cmds == 1) {
+			if (atoi(sec_cmd) > 15) {
+				fprintf(stderr, "Error: Maximum time is 15\n");
+				exit(-2);
+			}
 		}
 	} else if (strcmp(command,"dark") == 0 ) {
 		if (n_addtl_cmds == 0) {

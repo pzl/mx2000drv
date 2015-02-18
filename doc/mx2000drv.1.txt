@@ -72,10 +72,10 @@ These commands require the *-p* option when used with any command except *profil
 	Cycle through the RGB combinations, including intermediates (yellow, cyan, magenta), only for the LEDs enabled by *color*. So FFFFFF will cycle through all colors and intermediates. 00FFFF will not show red, or magenta, but will show all others.
 
 *lit* ['TIME']::
-	Number of seconds the backlight is steady on when *breathe* is enabled.
+	Number of seconds the backlight is steady on when *breathe* is enabled. Min: 0, Max: 15
 
 *dark* ['TIME']::
-	Number of seconds the backlight is dim when *breathe* is enabled.
+	Number of seconds the backlight is off when *breathe* is enabled. Min: 0, Max: 15
 
 *pulse* ['TIME']::
 	Number of seconds the backlight takes to transition from lit to dark, when *breathe* is enabled.
