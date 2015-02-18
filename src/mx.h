@@ -93,7 +93,7 @@ MXCOMMAND(print_profile);
 MXCOMMAND(change_profile);
 MXCOMMAND(print_poll);
 MXCOMMAND(change_poll);
-MXCOMMAND(get_backlight);
+MXCOMMAND(backlight);
 MXCOMMAND(cycle);
 MXCOMMAND(color);
 MXCOMMAND(breathe);

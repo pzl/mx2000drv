@@ -165,8 +165,15 @@ int main(int argc, char **argv) {
 			action = get_standby_time;
 		}
 	} else if (strcmp(command,"backlight") == 0 ) {
-		if (n_addtl_cmds == 0) {
-			action = get_backlight;
+		action = backlight;
+		if (n_addtl_cmds > 1) {
+			fprintf(stderr, "Invalid number of arguments for backlight command.\n");
+			HELP(-2);
+		} else if (n_addtl_cmds == 1) {
+			if (!is_on_off(sec_cmd)) {
+				fprintf(stderr, "Error. Valid arguments for backlight are 'on' or 'off'\n");
+				exit(-2);
+			}
 		}
 	} else if (strcmp(command,"sensitivity") == 0 ) {
 
