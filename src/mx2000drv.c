@@ -11,6 +11,7 @@
 
 static void help(int status, char *program_name);
 static int valid_hex(char *s);
+static int is_on_off(char *s);
 
 int main(int argc, char **argv) {
 	int opt,
@@ -131,19 +132,7 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Invalid number of arguments for breathe command.\n");
 			HELP(-2);
 		} else if (n_addtl_cmds == 1) {
-			int input_err = 0;
-			if (sec_cmd[0] != 'o' && sec_cmd[0] != 'O') {
-				input_err = 1;
-			}
-			if (sec_cmd[1] != 'n' && sec_cmd[1] != 'N' &&
-			    sec_cmd[1] != 'f' && sec_cmd[1] != 'F'){
-				input_err = 1;
-			}
-			if ( (sec_cmd[1] == 'f' || sec_cmd[1]=='F') && sec_cmd[2] != 'f' && sec_cmd[2] != 'F' ) {
-				input_err = 1;
-			}
-
-			if (input_err) {
+			if (!is_on_off(sec_cmd)) {
 				fprintf(stderr, "Error. Valid arguments for breathe are 'on' or 'off'\n");
 				exit(-2);
 			}
@@ -267,4 +256,33 @@ static int valid_hex(char *s) {
 	} else {
 		return 0;
 	}
+}
+
+static int is_on_off(char *s) {
+	int len = strlen(s);
+
+	if (len < 2 || len > 3) {
+		return 0;
+	}
+
+	if (s[0] != 'o' && s[0] != 'O') {
+		return 0;
+	}
+
+
+	if (s[1] == 'n' || s[1]=='N') {
+		if (len == 3) {
+			return 0;
+		}
+	} else if (s[1] == 'f' || s[1]=='F') {
+		if (len == 2 || (s[2] != 'f' && s[2] != 'F')) {
+			return 0;
+		}
+	} else {
+		//second letter incorrect
+		return 0;
+	}
+
+
+	return 1;
 }
