@@ -37,7 +37,7 @@
 
 #define BACKLIGHT_ENABLED_MSK (1 << 7)
 #define BREATHE_ENABLED_MSK 0x70
-#define CYCLE_ENABLED_MSK 0x0F
+#define CYCLE_ENABLED_MSK 0x08
 #define LIT_TIME_MSK 0xF0
 #define DARK_TIME_MSK 0x0F
 
@@ -94,7 +94,7 @@ MXCOMMAND(change_profile);
 MXCOMMAND(print_poll);
 MXCOMMAND(change_poll);
 MXCOMMAND(get_backlight);
-MXCOMMAND(get_cycle);
+MXCOMMAND(cycle);
 MXCOMMAND(color);
 MXCOMMAND(breathe);
 MXCOMMAND(get_lit_time);

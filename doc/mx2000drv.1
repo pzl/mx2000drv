@@ -103,9 +103,8 @@ Whether the mouse LEDs fade and pulse over time
 .PP
 \fBcycle\fR [\fION\fR|\fIOFF\fR]
 .RS 4
-Whether the mouse cycles through the colors red, green, blue, cyan, white, purple, yellow with each fade\&. When enabled, ignores
-\fBcolor\fR
-setting\&.
+Cycle through the RGB combinations, including intermediates (yellow, cyan, magenta), only for the LEDs enabled by
+\fBcolor\fR\&. So FFFFFF will cycle through all colors and intermediates\&. 00FFFF will not show red, or magenta, but will show all others\&.
 .RE
 .PP
 \fBlit\fR [\fITIME\fR]

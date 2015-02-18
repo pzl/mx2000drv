@@ -69,7 +69,7 @@ These commands require the *-p* option when used with any command except *profil
 	Whether the mouse LEDs fade and pulse over time
 
 *cycle* ['ON'|'OFF']::
-	Whether the mouse cycles through the colors red, green, blue, cyan, white, purple, yellow with each fade. When enabled, ignores *color* setting.
+	Cycle through the RGB combinations, including intermediates (yellow, cyan, magenta), only for the LEDs enabled by *color*. So FFFFFF will cycle through all colors and intermediates. 00FFFF will not show red, or magenta, but will show all others.
 
 *lit* ['TIME']::
 	Number of seconds the backlight is steady on when *breathe* is enabled.

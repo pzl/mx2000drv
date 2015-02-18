@@ -138,8 +138,15 @@ int main(int argc, char **argv) {
 			}
 		}
 	} else if (strcmp(command,"cycle") == 0 ) {
-		if (n_addtl_cmds == 0) {
-			action = get_cycle;
+		action = cycle;
+		if (n_addtl_cmds > 1) {
+			fprintf(stderr, "Invalid number of arguments for cycle command.\n");
+			HELP(-2);
+		} else if (n_addtl_cmds == 1) {
+			if (!is_on_off(sec_cmd)) {
+				fprintf(stderr, "Error. Valid arguments for cycle are 'on' or 'off'\n");
+				exit(-2);
+			}
 		}
 	} else if (strcmp(command,"lit") == 0 ) {
 		if (n_addtl_cmds == 0) {
