@@ -7,15 +7,17 @@
 
 #define PROFILE_UNSET -1
 #define VB_PRINT(...) do { if (verbose){ fprintf(stderr, __VA_ARGS__); } } while (0)
+#define HELP(x) help(x,argv[0])
 
 static void help(int status, char *program_name);
 
 int main(int argc, char **argv) {
 	int opt,
 		profile=PROFILE_UNSET,
+		n_addtl_cmds,
 		verbose=0,
 		err;
-	char *command;
+	char *command, *sec_cmd, *third_cmd;
 	MXCommand action;
 	const char *short_opt = "hp:vV";
 	struct option long_opt[] = {
@@ -36,7 +38,7 @@ int main(int argc, char **argv) {
 				profile = atoi(optarg);
 				if (profile < 1 || profile > 4){
 					fprintf(stderr, "Profile %s out of range (1-4)\n", optarg);
-					help(-2,argv[0]);
+					HELP(-2);
 				}
 				break;
 
@@ -51,18 +53,18 @@ int main(int argc, char **argv) {
 
 
 			case 'h':
-				help(0,argv[0]);
+				HELP(0);
 				break;
 			case -1: //no more args
 			case 0:	//long options toggles
 				break;
 			case ':':
 			case '?':
-				help(-2,argv[0]);
+				HELP(-2);
 				break;
 			default:
 				fprintf(stderr, "%s: invalid option -- %c\n", argv[0], opt);
-				help(-2,argv[0]);
+				HELP(-2);
 				break;
 		}
 	}
@@ -72,26 +74,39 @@ int main(int argc, char **argv) {
 	*/
 	if (argv[optind] == NULL){
 		fprintf(stderr, "A command is required. None provided\n");
-		help(-2,argv[0]);
+		HELP(-2);
 	}
 	command = argv[optind];
+	n_addtl_cmds = argc - optind - 1;
+
+	if (n_addtl_cmds <= 0 || argv[optind+1] == NULL) {
+		sec_cmd = NULL;
+	} else {
+		sec_cmd = argv[optind+1];
+	}
+	if ( n_addtl_cmds <= 1 || argv[optind+2] == NULL) {
+		third_cmd = NULL;
+	} else {
+		third_cmd = argv[optind+2];
+	}
+
 
 	action = NULL;
 
 	if (strcmp(command,"profile") == 0) {
-		if (optind == argc-1){
+		if (n_addtl_cmds == 0){
 			action = print_profile;
-		} else if (optind == argc-2){
+		} else if (n_addtl_cmds == 1){
 			unsigned char p = (unsigned char) atoi(argv[optind+1]);
 			if (p > 0 && p <= 4) {
 				action = change_profile;
 			} else {
 				fprintf(stderr, "Error: Profile number must be 1-4\n");
-				help(-2,argv[0]);
+				HELP(-2);
 			}
 		} else {
 			fprintf(stderr, "invalid number of arguments for 'profile' command\n");
-			help(-2,argv[0]);
+			HELP(-2);
 		}
 
 	} else if (strcmp(command,"button") == 0 ) {
@@ -103,31 +118,31 @@ int main(int argc, char **argv) {
 	} else if (strcmp(command,"macro") == 0 ) {
 
 	} else if (strcmp(command,"breathe") == 0 ) {
-		if (optind == argc -1) {
+		if (n_addtl_cmds == 0) {
 			action = get_breathe;
 		}
 	} else if (strcmp(command,"cycle") == 0 ) {
-		if (optind == argc -1) {
+		if (n_addtl_cmds == 0) {
 			action = get_cycle;
 		}
 	} else if (strcmp(command,"lit") == 0 ) {
-		if (optind == argc -1) {
+		if (n_addtl_cmds == 0) {
 			action = get_lit_time;
 		}
 	} else if (strcmp(command,"dark") == 0 ) {
-		if (optind == argc -1) {
+		if (n_addtl_cmds == 0) {
 			action = get_dark_time;
 		}
 	} else if (strcmp(command,"pulse") == 0 ) {
-		if (optind == argc -1) {
+		if (n_addtl_cmds == 0) {
 			action = get_pulse_time;
 		}
 	} else if (strcmp(command,"standby") == 0 ) {
-		if (optind == argc -1) {
+		if (n_addtl_cmds == 0) {
 			action = get_standby_time;
 		}
 	} else if (strcmp(command,"backlight") == 0 ) {
-		if (optind == argc -1) {
+		if (n_addtl_cmds == 0) {
 			action = get_backlight;
 		}
 	} else if (strcmp(command,"sensitivity") == 0 ) {
@@ -137,9 +152,9 @@ int main(int argc, char **argv) {
 	} else if (strcmp(command,"dpi") == 0 ) {
 
 	} else if (strcmp(command,"poll") == 0 ) {
-		if (optind == argc -1){
+		if (n_addtl_cmds == 0){
 			action = print_poll;
-		} else if (optind == argc-2) {
+		} else if (n_addtl_cmds == 1) {
 			if (strcmp(argv[optind+1],"1000") == 0 ||
 			    strcmp(argv[optind+1],"500") == 0 ||
 			    strcmp(argv[optind+1],"250") == 0 ||
@@ -151,7 +166,7 @@ int main(int argc, char **argv) {
 			}
 		} else {
 			fprintf(stderr, "invalid number of arguments for 'poll' command\n");
-			help(-2,argv[0]);
+			HELP(-2);
 		}
 
 	} else if (strcmp(command,"reset") == 0 ) {
@@ -162,7 +177,7 @@ int main(int argc, char **argv) {
 		action = load_info;
 	} else {
 		fprintf(stderr, "%s is not a valid command.\n", command);
-		help(-2, argv[0]);
+		HELP(-2);
 	}
 
 	if (action == NULL){
@@ -191,7 +206,7 @@ int main(int argc, char **argv) {
 		VB_PRINT("No profile provided, using active profile %d if needed\n", profile );
 	}
 
-	err = action(argc - (optind+1), argv+(optind+1), profile-1);
+	err = action(n_addtl_cmds, argv+(optind+1), profile-1);
 	if (err < 0){
 		finish_usb();
 		return -1;
