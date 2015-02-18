@@ -233,7 +233,17 @@ int main(int argc, char **argv) {
 			HELP(-2);
 		}
 	} else if (strcmp(command,"accel") == 0 ) {
-
+		action = accel;
+		if (n_addtl_cmds > 1) {
+			fprintf(stderr, "Invalid number of arguments for accel command.\n");
+			HELP(-2);
+		} else if (n_addtl_cmds == 1) {
+			int val = atoi(sec_cmd);
+			if (val < 0 || val > 255) {
+				fprintf(stderr, "Error, value out of range (0-255)\n");
+				exit(-2);
+			}
+		}
 	} else if (strcmp(command,"dpi") == 0 ) {
 
 	} else if (strcmp(command,"poll") == 0 ) {

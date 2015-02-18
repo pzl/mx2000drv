@@ -102,6 +102,7 @@ MXCOMMAND(dark_time);
 MXCOMMAND(pulse_time);
 MXCOMMAND(standby_time);
 MXCOMMAND(sensitivity);
+MXCOMMAND(accel);
 
 
 /*

@@ -90,7 +90,7 @@ These commands require the *-p* option when used with any command except *profil
 	The pointer sensitivity, a value between -5 and 5, inclusive.
 
 *accel* ['SPEED']::
-	The mouse acceleration in milliseconds, between 2 and 255.
+	The mouse acceleration in milliseconds. Min: 0, Max: 255.
 
 *dpi* 'PRESET' ['VALUE']::
 	'PRESET' must be a number 1-4. 'VALUE' must be between 100 and 1600 in increments of 100

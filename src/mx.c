@@ -433,7 +433,7 @@ MXCOMMAND(sensitivity) {
 
 	err = read_addr(GLOBAL_PROFILE,addr,buf);
 	if (err < 0){
-		fprintf(stderr, "Error reading standby info\n");
+		fprintf(stderr, "Error reading sensitivity info\n");
 		return -1;
 	}
 
@@ -501,6 +501,51 @@ MXCOMMAND(sensitivity) {
 
 	return 0;
 }
+
+MXCOMMAND(accel) {
+	int err;
+	unsigned char addr, value;
+	unsigned char buf[MSG_LEN];
+
+	addr = SENSITIVITY_ADDR;
+	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
+
+	err = read_addr(GLOBAL_PROFILE,addr,buf);
+	if (err < 0){
+		fprintf(stderr, "Error reading accel info\n");
+		return -1;
+	}
+
+	if (argc == 0) {
+		value = buf[7];
+		printf("%d\n", value);
+	} else {
+		unsigned long val_ul;
+		char *end;
+		val_ul = strtoul(argv[0],&end,10);
+		if (*end != '\0') {
+			fprintf(stderr, "Error: failed to parse numeric input for accel time\n");
+			return -1;
+		}
+
+		if (val_ul > 255) {
+			fprintf(stderr, "Error: accel time out of range (0-255)\n");
+			return -1;
+		}
+		value = (unsigned char) val_ul;
+
+		buf[7] = value;
+
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		if (err < 0){
+			fprintf(stderr, "Error writing accel info\n");
+			return -1;
+		}		
+	}
+
+	return 0;
+}
+
 
 
 
