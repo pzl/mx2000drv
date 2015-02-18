@@ -182,8 +182,15 @@ int main(int argc, char **argv) {
 			}
 		}
 	} else if (strcmp(command,"standby") == 0 ) {
-		if (n_addtl_cmds == 0) {
-			action = get_standby_time;
+		action = standby_time;
+		if (n_addtl_cmds > 1) {
+			fprintf(stderr, "Invalid number of arguments for standby command.\n");
+			HELP(-2);
+		} else if (n_addtl_cmds == 1) {
+			if (atoi(sec_cmd) > 63) {
+				fprintf(stderr, "Error: maximum standby time is 63\n");
+				exit(-2);
+			}
 		}
 	} else if (strcmp(command,"backlight") == 0 ) {
 		action = backlight;

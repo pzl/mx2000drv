@@ -370,32 +370,53 @@ MXCOMMAND(pulse_time) {
 
 		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
 		if (err < 0){
-			fprintf(stderr, "Error writing pulw info\n");
+			fprintf(stderr, "Error writing pulse info\n");
 			return -1;
 		}	
 	}
 
 	return 0;
 }
-MXCOMMAND(get_standby_time) {
-	int err, value;
-	unsigned char addr;
-	unsigned char response[MSG_LEN];
-
-	(void) argc;
-	(void) argv;
+MXCOMMAND(standby_time) {
+	int err;
+	unsigned char addr, value;
+	unsigned char buf[MSG_LEN];
 
 	addr = COLOR_TIME_ADDR;
 	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
 
-	err = read_addr(GLOBAL_PROFILE,addr,response);
+	err = read_addr(GLOBAL_PROFILE,addr,buf);
 	if (err < 0){
 		fprintf(stderr, "Error reading standby info\n");
 		return -1;
 	}
 
-	value = (response[6]/0x04-1)*1.5+1;
-	printf("%d\n", value);
+	if (argc == 0) {
+		value = buf[6]/4;
+		printf("%d\n", value);
+	} else {
+		unsigned long val_ul;
+		char *end;
+		val_ul = strtoul(argv[0],&end,10);
+		if (*end != '\0') {
+			fprintf(stderr, "Error: failed to parse numeric input for standby time\n");
+			return -1;
+		}
+
+		if (val_ul > 63) {
+			fprintf(stderr, "Error: standby time out of range (0-60)\n");
+			return -1;
+		}
+		value = (unsigned char) val_ul;
+
+		buf[6] = value*4;
+
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		if (err < 0){
+			fprintf(stderr, "Error writing standby info\n");
+			return -1;
+		}		
+	}
 
 	return 0;
 }

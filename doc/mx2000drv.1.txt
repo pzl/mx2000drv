@@ -81,7 +81,7 @@ These commands require the *-p* option when used with any command except *profil
 	Number of seconds the backlight takes to transition from lit to dark, when *breathe* is enabled. Min: 0, Max: 63
 
 *standby* ['TIME']::
-	Enable backlight 'TIME' seconds after standby mode has come on.
+	Enable backlight 'TIME' seconds after standby mode has come on. Min: 0, Max: 63
 
 *backlight* ['ON'|'OFF']::
 	Enable or disable the backlight mouse LEDs
