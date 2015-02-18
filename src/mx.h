@@ -4,8 +4,10 @@
 
 #define MSG_LEN 8
 #define ADDR_DATA_LEN 4
-#define BUF_SIZE 1285
-/* 64 addresses * 5 memory areas * 4 bytes + (1)active profile + (2)DPI + (2)polling rates */
+#define SEC_SIZE 256
+/* 64 addresses (00-FC/step) * 4 bytes */
+#define BUF_SIZE SEC_SIZE*5+5
+/* 5 memory areas *  (1)active profile + (2)DPI + (2)polling rates */
 
 #define NUM_PROFILES 4
 #define GLOBAL_PROFILE 5
@@ -104,8 +106,9 @@ MXCOMMAND(get_standby_time);
 /*
 	Helpers
 */
-int read_addr(int profile, unsigned char addr, unsigned char *response);
-int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf);
+int read_addr(int profile, unsigned char addr, unsigned char *response); /* get info at address, safe */
+int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf); /* change info at address to new data. Performs sleep, section erasing and rewriting, and awakens. Can be called as long as device is open, but performs action immediately. Multiple changes to data should perform tasks on section-level basis, not this */
+int set_addr(unsigned char profile, unsigned char addr, unsigned char *buf); /* writes directly to addr. Does not check if mouse is sleeping, or erase has been performed. Should not be used outside of write_section */
 
 unsigned char get_active_profile(void);
 int set_profile(unsigned char);

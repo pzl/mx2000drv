@@ -520,11 +520,16 @@ MXCOMMAND(factory_reset) {
 }
 
 
-/*
+/* ---------------------------------------------------
 		Helper functions,
 		not necessarily outside commands
-*/
+------------------------------------------------------ */
 
+
+/*
+	Reads data from section 'profile' and address 'addr' into the
+	already-allocated response buffer which MUST be MSG_LEN(8) size
+*/
 int read_addr(int profile, unsigned char addr, unsigned char *response){
 	int err;
 	unsigned char command[MSG_LEN] = {
@@ -537,9 +542,78 @@ int read_addr(int profile, unsigned char addr, unsigned char *response){
 
 
 	return err;
-
 }
+
+/*
+	changes data at section 'profile' and address 'addr' to be 'buf'.
+	Includes full-section operations. Operation occurs immediately
+
+	profile: section number, must be 0-3 or 5
+	addr: in the range 0x00-0xFC inclusive, in increments of 4
+	buf: array of ADDR_DATA_LEN(4) uchars of data to write
+*/
 int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf) {
+	unsigned char cur_prof;
+	unsigned char sec[SEC_SIZE];
+	unsigned char *secp;
+	int err;
+
+	cur_prof = get_active_profile();
+
+
+	/* get all existing data we'll be writing back */
+	err = read_section(profile,sec);
+	if (err < 0) {
+		fprintf(stderr, "Error: couldn't write data. Section read failed\n");
+		return -1;
+	}
+
+	printf("read: data at addr 0x%02hx: %02hx%02hx%02hx%02hx\n",
+	       addr,
+	       sec[addr], sec[addr+1],sec[addr+2],sec[addr+3]);
+
+
+	/* change data */
+	secp = sec + addr; /* point to start of data to change */
+	memcpy(secp,buf,ADDR_DATA_LEN);
+
+	printf("write: data at addr 0x%02hx: %02hx%02hx%02hx%02hx\n",
+	       addr,
+	       sec[addr], sec[addr+1],sec[addr+2],sec[addr+3]);
+
+	/* write back entire section to mouse */
+	err = mouse_sleep();
+	if (err < 0){
+		fprintf(stderr, "Error: couldn't write data. Failed trying to put mouse to sleep\n");
+		mouse_wake();
+		return -1;
+	}
+
+	err = write_section(profile,sec);
+	if (err < 0) {
+		fprintf(stderr, "Error: problem writing data\n");
+		mouse_wake();
+		return -1;
+	}
+
+	err = mouse_wake();
+	if (err < 0) {
+		fprintf(stderr, "Error: failed waking mouse back up\n");
+		return -1;
+	}
+
+	set_profile(cur_prof);
+
+	return 0;
+}
+
+/*
+	performs action of writing the ADDR_DATA_LEN(4) 'buf' to 'addr' in section 
+	number 'profile'. Writes immediately without any reads, erases, or  section-
+	level operations. Should not be performed in isolation, but only through
+	section-level commands. after proper sleep, read, and erase.
+*/
+int set_addr(unsigned char profile, unsigned char addr, unsigned char *buf) {
 	int err;
 	unsigned char response[MSG_LEN],
 				  command[MSG_LEN] = {
@@ -753,7 +827,7 @@ int write_section(unsigned char section_num, unsigned char *buf){
 		fprintf(stderr, "Error: problem erasing section before writing\n");
 	}
 	for (i=0; i<=ADDR_STOP; i+=ADDR_STEP) {
-		err = write_addr(section_num, (unsigned char) i, buf);
+		err = set_addr(section_num, (unsigned char) i, buf);
 		if (err < 0){
 			fprintf(stderr, "Error writing %d-0x%02hx\n", section_num,i);
 		}
