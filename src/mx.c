@@ -219,9 +219,6 @@ MXCOMMAND(color) {
 	unsigned char addr;
 	unsigned char buf[MSG_LEN];
 
-	(void) argc;
-	(void) argv;
-
 	addr = COLOR_ADDR;
 	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
 
@@ -243,8 +240,6 @@ MXCOMMAND(color) {
 		buf[1] = ( (new_color & 0xff0000) >> 16);
 		buf[2] = ( (new_color & 0x00ff00) >> 8);
 		buf[3] = ( (new_color & 0x0000ff) );
-
-		printf("changing color to %02hx%02hx%02hx\n",buf[1],buf[2],buf[3]);
 
 		if (*end != '\0') {
 			fprintf(stderr, "Error: failed to change color, input was not valid hex\n");
