@@ -95,7 +95,7 @@ MXCOMMAND(print_poll);
 MXCOMMAND(change_poll);
 MXCOMMAND(get_backlight);
 MXCOMMAND(get_cycle);
-MXCOMMAND(get_color);
+MXCOMMAND(color);
 MXCOMMAND(get_breathe);
 MXCOMMAND(get_lit_time);
 MXCOMMAND(get_dark_time);

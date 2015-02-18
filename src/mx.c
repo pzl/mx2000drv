@@ -214,10 +214,10 @@ MXCOMMAND(get_cycle) {
 	return 0;
 }
 
-MXCOMMAND(get_color) {
+MXCOMMAND(color) {
 	int err;
 	unsigned char addr;
-	unsigned char response[MSG_LEN];
+	unsigned char buf[MSG_LEN];
 
 	(void) argc;
 	(void) argv;
@@ -225,13 +225,37 @@ MXCOMMAND(get_color) {
 	addr = COLOR_ADDR;
 	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
 
-	err = read_addr(GLOBAL_PROFILE,addr,response);
+
+	err = read_addr(GLOBAL_PROFILE,addr,buf);
 	if (err < 0){
 		fprintf(stderr, "Error reading color info\n");
 		return -1;
 	}
 
-	printf("%02hx%02hx%02hx\n", response[5],response[6],response[7]);
+	if (argc == 0) {
+		printf("%02hx%02hx%02hx\n", buf[5],buf[6],buf[7]);
+		return 0;
+	} else {
+		char *end;
+		unsigned long new_color = strtoul(argv[0],&end,16);
+
+		buf[0] = buf[4]; //keep breathe, backlight, and cycle info
+		buf[1] = ( (new_color & 0xff0000) >> 16);
+		buf[2] = ( (new_color & 0x00ff00) >> 8);
+		buf[3] = ( (new_color & 0x0000ff) );
+
+		printf("changing color to %02hx%02hx%02hx\n",buf[1],buf[2],buf[3]);
+
+		if (*end != '\0') {
+			fprintf(stderr, "Error: failed to change color, input was not valid hex\n");
+			return -1;
+		}
+		err = write_addr(GLOBAL_PROFILE,addr,buf);
+		if (err < 0){
+			fprintf(stderr, "Error writing color info\n");
+			return -1;
+		}
+	}
 
 	return 0;
 }
