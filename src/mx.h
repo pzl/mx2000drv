@@ -108,6 +108,7 @@ int read_addr(int profile, unsigned char addr, unsigned char *response);
 int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf);
 
 unsigned char get_active_profile(void);
+int set_profile(unsigned char);
 int get_poll_rates(unsigned char *);
 
 int mouse_sleep(void);

@@ -23,10 +23,7 @@ MXCOMMAND(change_profile) {
 	int err;
 	char *end;
 	unsigned char profile_uc;
-	unsigned char response[MSG_LEN],
-				  command[MSG_LEN] = {
-		0xb3, 0x20, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00
-	};
+
 	(void) argc;
 	(void) target_profile;
 	
@@ -43,36 +40,9 @@ MXCOMMAND(change_profile) {
 
 	/* range checks already done since we force 1-4 range above */
 	profile_uc = (unsigned char) (profile_l - 1);
-	command[3] = profile_uc;
+	err = set_profile(profile_uc);
 
-
-	err = send_command(command);
-	if (err < 0){
-		fprintf(stderr, "Error getting active mouse profile\n");
-		return -1;
-	}
-	err = read_back(response);
-	if (err < 0){
-		fprintf(stderr, "Error getting active mouse profile\n");
-		return -1;
-	}
-
-	if ( (response[4] >> 4) != profile_uc) {
-		fprintf(stderr, "Error setting profile: mouse did not acknowledge change\n");
-		return -1;
-	}
-
-	if (response[0] != 0xb3 ||
-	    response[1] != 0x20 ||
-	    response[2] != 0x00 ||
-	    response[5] != 0x00 ||
-	    response[6] != 0x0e ||
-	    response[7] != 0x0f){
-		fprintf(stderr, "Warn: mouse profile may have changed, but got unknown response\n");
-	}
-
-
-	return 0;
+	return err;
 }
 
 MXCOMMAND(read_info) {
@@ -639,6 +609,48 @@ unsigned char get_active_profile(void) {
 
 	return (response[4] >> 4) ;
 
+}
+
+int set_profile(unsigned char profile) {
+	int err;
+	unsigned char response[MSG_LEN],
+				  command[MSG_LEN] = {
+		0xb3, 0x20, 0x08, profile, 0x00, 0x00, 0x00, 0x00
+	};
+
+
+	if (profile > 3){
+		fprintf(stderr, "Error: profile out of bounds\n");
+		return -1;
+	}
+
+	err = send_command(command);
+	if (err < 0){
+		fprintf(stderr, "Error setting mouse profile\n");
+		return -1;
+	}
+	err = read_back(response);
+	if (err < 0){
+		fprintf(stderr, "Error setting mouse profile\n");
+		return -1;
+	}
+
+	if ( (response[4] >> 4) != profile) {
+		fprintf(stderr, "Error setting profile: mouse did not acknowledge change\n");
+		return -1;
+	}
+
+	if (response[0] != 0xb3 ||
+	    response[1] != 0x20 ||
+	    response[2] != 0x00 ||
+	    response[5] != 0x00 ||
+	    response[6] != 0x0e ||
+	    response[7] != 0x0f){
+		fprintf(stderr, "Warn: mouse profile may have changed, but got unknown response\n");
+	}
+
+
+	return 0;
 }
 
 /*
