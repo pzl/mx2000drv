@@ -204,7 +204,34 @@ int main(int argc, char **argv) {
 			}
 		}
 	} else if (strcmp(command,"sensitivity") == 0 ) {
+		action = sensitivity;
+		if (n_addtl_cmds == 0) {
+			fprintf(stderr, "Invalid number of arguments. Sensitivity requires X or Y be specified\n");
+			HELP(-2);
+		}
 
+		if (n_addtl_cmds > 0) {
+			if (sec_cmd[1] != '\0') {
+				fprintf(stderr, "Invalid argument: next arg must be X or Y\n");
+				HELP(-2);
+			}
+			if (sec_cmd[0] != 'x' && sec_cmd[0] != 'X' &&
+			    sec_cmd[0] != 'y' && sec_cmd[0] != 'Y') {
+				fprintf(stderr, "Invalid argument: next arg must be X or Y\n");
+				HELP(-2);
+			}
+		}
+
+		if (n_addtl_cmds == 2) {
+			int value = atoi(third_cmd);
+			if (value < -5 || value > 5) {
+				fprintf(stderr, "Error: value out of range. Sensitivity must be between -5 and 5\n");
+				HELP(-2);
+			}
+		} else if (n_addtl_cmds > 2) {
+			fprintf(stderr, "Invalid number of arguments (too many)!\n");
+			HELP(-2);
+		}
 	} else if (strcmp(command,"accel") == 0 ) {
 
 	} else if (strcmp(command,"dpi") == 0 ) {

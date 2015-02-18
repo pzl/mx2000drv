@@ -422,6 +422,87 @@ MXCOMMAND(standby_time) {
 }
 
 
+MXCOMMAND(sensitivity) {
+	int err, axis;
+	long val_l;
+	unsigned char addr, value;
+	unsigned char buf[MSG_LEN];
+
+	addr = SENSITIVITY_ADDR;
+	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
+
+	err = read_addr(GLOBAL_PROFILE,addr,buf);
+	if (err < 0){
+		fprintf(stderr, "Error reading standby info\n");
+		return -1;
+	}
+
+	if (argv[0][0] == 'x' || argv[0][0] == 'X') {
+		axis = 4;
+	} else {
+		axis = 5;
+	}
+		
+
+
+	if (argc == 1) {
+		value = buf[axis];
+
+		if ( (value & 0x0F) == 5) {
+			//somewhat normal convention
+			val_l = (value >> 4) - 5;
+
+
+			/* weird logic. not sure why these values are what they are */
+		} else if (value == 0x11) {
+			val_l = 0;
+		} else if (value == 0x1a) {
+			val_l = -5;
+		} else if (value == 0x21) {
+			val_l = 5;
+		} else {
+			printf("Error: unknown sensitivity response: 0x%02hx\n", buf[axis]);
+			val_l = 0;
+		}
+
+		printf("%ld\n", val_l);
+	} else {
+		char *end;
+		val_l = strtol(argv[1],&end,10);
+		if (*end != '\0') {
+			fprintf(stderr, "Error: failed to parse numeric input for sensitivity\n");
+			return -1;
+		}
+
+		if (val_l < -5 || val_l > 5) {
+			fprintf(stderr, "Error: sensitivity out of range (-5)-5\n");
+			return -1;
+		}
+
+		if (val_l > -5 || val_l < 5) {
+			value = (unsigned char) ( (5+val_l) << 4) | 5;
+		}
+		if (val_l == 0) {
+			value = 0x11;
+		} else if (val_l == -5) {
+			value = 0x1a;
+		} else if (val_l == 5) {
+			value = 0x21;
+		}
+
+		buf[axis] = value;
+
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		if (err < 0){
+			fprintf(stderr, "Error writing sensitivity info\n");
+			return -1;
+		}		
+	}
+
+	return 0;
+}
+
+
 
 MXCOMMAND(change_poll) {
 	int err;
