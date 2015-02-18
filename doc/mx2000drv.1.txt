@@ -78,7 +78,7 @@ These commands require the *-p* option when used with any command except *profil
 	Number of seconds the backlight is off when *breathe* is enabled. Min: 0, Max: 15
 
 *pulse* ['TIME']::
-	Number of seconds the backlight takes to transition from lit to dark, when *breathe* is enabled.
+	Number of seconds the backlight takes to transition from lit to dark, when *breathe* is enabled. Min: 0, Max: 63
 
 *standby* ['TIME']::
 	Enable backlight 'TIME' seconds after standby mode has come on.

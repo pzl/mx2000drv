@@ -171,8 +171,15 @@ int main(int argc, char **argv) {
 			}
 		}
 	} else if (strcmp(command,"pulse") == 0 ) {
-		if (n_addtl_cmds == 0) {
-			action = get_pulse_time;
+		action = pulse_time;
+		if (n_addtl_cmds > 1) {
+			fprintf(stderr, "Invalid number of arguments for pulse command.\n");
+			HELP(-2);
+		} else if (n_addtl_cmds == 1) {
+			if (atoi(sec_cmd) > 63) {
+				fprintf(stderr, "Error: maximum pulse time is 63\n");
+				exit(-2);
+			}
 		}
 	} else if (strcmp(command,"standby") == 0 ) {
 		if (n_addtl_cmds == 0) {

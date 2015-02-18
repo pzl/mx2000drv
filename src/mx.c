@@ -334,25 +334,46 @@ MXCOMMAND(dark_time) {
 }
 
 
-MXCOMMAND(get_pulse_time) {
+MXCOMMAND(pulse_time) {
 	int err;
 	unsigned char addr, value;
-	unsigned char response[MSG_LEN];
-
-	(void) argc;
-	(void) argv;
+	unsigned char buf[MSG_LEN];
 
 	addr = COLOR_TIME_ADDR;
 	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
 
-	err = read_addr(GLOBAL_PROFILE,addr,response);
+	err = read_addr(GLOBAL_PROFILE,addr,buf);
 	if (err < 0){
 		fprintf(stderr, "Error reading pulse info\n");
 		return -1;
 	}
 
-	value = response[4]/0x04;
-	printf("%d\n", value);
+	if (argc == 0) {
+		value = buf[4]/4;
+		printf("%d\n", value);
+	} else {
+		unsigned long val_ul;
+		char *end;
+		val_ul = strtoul(argv[0],&end,10);
+		if (*end != '\0') {
+			fprintf(stderr, "Error: failed to parse numeric input for pulse time\n");
+			return -1;
+		}
+
+		if (val_ul > 63) {
+			fprintf(stderr, "Error: pulse time out of range (0-60)\n");
+			return -1;
+		}
+		value = (unsigned char) val_ul;
+
+		buf[4] = value*4;
+
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		if (err < 0){
+			fprintf(stderr, "Error writing pulw info\n");
+			return -1;
+		}	
+	}
 
 	return 0;
 }
