@@ -126,8 +126,27 @@ int main(int argc, char **argv) {
 	} else if (strcmp(command,"macro") == 0 ) {
 
 	} else if (strcmp(command,"breathe") == 0 ) {
-		if (n_addtl_cmds == 0) {
-			action = get_breathe;
+		action = breathe;
+		if (n_addtl_cmds > 1) {
+			fprintf(stderr, "Invalid number of arguments for breathe command.\n");
+			HELP(-2);
+		} else if (n_addtl_cmds == 1) {
+			int input_err = 0;
+			if (sec_cmd[0] != 'o' && sec_cmd[0] != 'O') {
+				input_err = 1;
+			}
+			if (sec_cmd[1] != 'n' && sec_cmd[1] != 'N' &&
+			    sec_cmd[1] != 'f' && sec_cmd[1] != 'F'){
+				input_err = 1;
+			}
+			if ( (sec_cmd[1] == 'f' || sec_cmd[1]=='F') && sec_cmd[2] != 'f' && sec_cmd[2] != 'F' ) {
+				input_err = 1;
+			}
+
+			if (input_err) {
+				fprintf(stderr, "Error. Valid arguments for breathe are 'on' or 'off'\n");
+				exit(-2);
+			}
 		}
 	} else if (strcmp(command,"cycle") == 0 ) {
 		if (n_addtl_cmds == 0) {

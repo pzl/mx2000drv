@@ -255,27 +255,39 @@ MXCOMMAND(color) {
 	return 0;
 }
 
-MXCOMMAND(get_breathe) {
+MXCOMMAND(breathe) {
 	int err;
 	unsigned char addr;
-	unsigned char response[MSG_LEN];
-
-	(void) argc;
-	(void) argv;
+	unsigned char buf[MSG_LEN];
 
 	addr = COLOR_ADDR;
 	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
 
-	err = read_addr(GLOBAL_PROFILE,addr,response);
+	err = read_addr(GLOBAL_PROFILE,addr,buf);
 	if (err < 0){
 		fprintf(stderr, "Error reading breathe info\n");
 		return -1;
 	}
 
-	if (response[4] & BREATHE_ENABLED_MSK) {
-		printf("on\n");
+	if (argc == 0) {
+		if (buf[4] & BREATHE_ENABLED_MSK) {
+			printf("on\n");
+		} else {
+			printf("off\n");
+		}
 	} else {
-		printf("off\n");
+	
+		if (argv[0][1] == 'n' || argv[0][1] == 'N'){
+			buf[4] |= BREATHE_ENABLED_MSK; 
+		} else {
+			buf[4] &= ~(BREATHE_ENABLED_MSK);
+		}
+
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		if (err < 0){
+			fprintf(stderr, "Error writing breathe info\n");
+			return -1;
+		}
 	}
 
 	return 0;
