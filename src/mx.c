@@ -45,77 +45,6 @@ MXCOMMAND(change_profile) {
 	return err;
 }
 
-MXCOMMAND(read_info) {
-	FILE *fp;
-	int err, i;
-	unsigned char *buf,
-				  *bufp,
-				  response[MSG_LEN],
-				  stg_read[MSG_LEN] = {
-		0xb3, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-	};
-
-	(void) target_profile;
-
-
-	if (argc == 0 || argv[0][0]=='-'){
-		fp = stdout;
-	} else {
-		fp = fopen(argv[0],"wb");
-		if (fp == NULL){
-			fprintf(stderr, "Error opening file for writing\n");
-			return -1;
-		}
-	}
-
-	buf = malloc(sizeof(unsigned char)*BUF_SIZE);
-
-	bufp = buf;
-
-	/* read macro memory */
-	for (i=0; i<NUM_PROFILES; i++){
-		read_section(i,bufp);
-		bufp += ADDR_DATA_LEN * (ADDR_STOP/ADDR_STEP + 1);
-	}
-
-	/* read settings memory */
-	read_section(GLOBAL_PROFILE, bufp);
-	bufp += ADDR_DATA_LEN * (ADDR_STOP/ADDR_STEP + 1);
-
-
-	/* read DPI settings */
-	err = send_command(stg_read);
-	err = read_back(response);
-	memcpy(bufp, response+3, 2);
-	bufp += 2;
-
-
-	/* read polling rates */
-	err = get_poll_rates(response);
-	memcpy(bufp, response, 2);
-	bufp += 2;
-
-	/* get active profile */
-	*bufp = get_active_profile();
-
-	fwrite(buf, sizeof(unsigned char), BUF_SIZE, fp);
-
-	fclose(fp);	/* word of caution:
-		we may have just closed stdout here, if no filename was given (or it was '-').
-		So any printfs or fprintf(stdout) will be quite a problem. But since to reach
-		this scenario, we are printing binary info to stdout, so it's likely being piped
-		into a file or into something like xxd, we likely *don't* want to print anything
-		else to stdout, since that would mess with the output. So closing is fine, but
-		we need to make sure we strictly refrain from printing to stdout. Almost everything
-		should go to stderr.
-	*/
-
-	free(buf);
-	return err;
-
-}
-
-
 MXCOMMAND(print_poll) {
 	int err, poll;
 	unsigned char rates[2];
@@ -500,6 +429,77 @@ MXCOMMAND(change_poll) {
 	}
 
 	return 0;
+}
+
+
+MXCOMMAND(read_info) {
+	FILE *fp;
+	int err, i;
+	unsigned char *buf,
+				  *bufp,
+				  response[MSG_LEN],
+				  stg_read[MSG_LEN] = {
+		0xb3, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+	};
+
+	(void) target_profile;
+
+
+	if (argc == 0 || argv[0][0]=='-'){
+		fp = stdout;
+	} else {
+		fp = fopen(argv[0],"wb");
+		if (fp == NULL){
+			fprintf(stderr, "Error opening file for writing\n");
+			return -1;
+		}
+	}
+
+	buf = malloc(sizeof(unsigned char)*BUF_SIZE);
+
+	bufp = buf;
+
+	/* read macro memory */
+	for (i=0; i<NUM_PROFILES; i++){
+		read_section(i,bufp);
+		bufp += ADDR_DATA_LEN * (ADDR_STOP/ADDR_STEP + 1);
+	}
+
+	/* read settings memory */
+	read_section(GLOBAL_PROFILE, bufp);
+	bufp += ADDR_DATA_LEN * (ADDR_STOP/ADDR_STEP + 1);
+
+
+	/* read DPI settings */
+	err = send_command(stg_read);
+	err = read_back(response);
+	memcpy(bufp, response+3, 2);
+	bufp += 2;
+
+
+	/* read polling rates */
+	err = get_poll_rates(response);
+	memcpy(bufp, response, 2);
+	bufp += 2;
+
+	/* get active profile */
+	*bufp = get_active_profile();
+
+	fwrite(buf, sizeof(unsigned char), BUF_SIZE, fp);
+
+	fclose(fp);	/* word of caution:
+		we may have just closed stdout here, if no filename was given (or it was '-').
+		So any printfs or fprintf(stdout) will be quite a problem. But since to reach
+		this scenario, we are printing binary info to stdout, so it's likely being piped
+		into a file or into something like xxd, we likely *don't* want to print anything
+		else to stdout, since that would mess with the output. So closing is fine, but
+		we need to make sure we strictly refrain from printing to stdout. Almost everything
+		should go to stderr.
+	*/
+
+	free(buf);
+	return err;
+
 }
 
 
