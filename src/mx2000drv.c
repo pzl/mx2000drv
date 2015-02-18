@@ -10,6 +10,7 @@
 #define HELP(x) help(x,argv[0])
 
 static void help(int status, char *program_name);
+static int valid_hex(char *s);
 
 int main(int argc, char **argv) {
 	int opt,
@@ -112,8 +113,15 @@ int main(int argc, char **argv) {
 	} else if (strcmp(command,"button") == 0 ) {
 
 	} else if (strcmp(command,"color") == 0 ) {
-		if (optind == argc -1) {
-			action = get_color;
+		action = color;
+		if (n_addtl_cmds > 1) {
+			fprintf(stderr, "Invalid number of arguments for color command.\n");
+			HELP(-2);
+		} else if (n_addtl_cmds == 1) {
+			if (!valid_hex(sec_cmd)){
+				fprintf(stderr, "Invalid color string. Must be 6-character hexadecimal (0-9,a-f) like 00FF00 for green\n");
+				exit(-2);
+			}
 		}
 	} else if (strcmp(command,"macro") == 0 ) {
 
@@ -232,4 +240,12 @@ static void help(int status, char *pgname) {
 			 "See man page for additional commands and settings options\n";
 	printf(usage, pgname);
 	exit(status);
+}
+
+static int valid_hex(char *s) {
+	if (strlen(s) == 6 && strspn(s,"0123456789abcdefABCDEF") == 6){
+		return 1;
+	} else {
+		return 0;
+	}
 }
