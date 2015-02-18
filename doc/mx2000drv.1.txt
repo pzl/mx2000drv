@@ -63,7 +63,7 @@ These commands require the *-p* option when used with any command except *profil
 	Map button to perform key 'SEQUENCE' when clicked.
 
 *color* ['RGB']::
-	Mouse backlight color as 6-character hexadecimal
+	Mouse backlight color as 6-character hexadecimal. Mostly. Each pair of hex characters does not control the overall brightness of that colored LED, but individually controls the fade cycle period of the LED. So mixed values will end up with a bit of a color cycle between them.
 
 *breathe* ['ON'|'OFF']::
 	Whether the mouse LEDs fade and pulse over time

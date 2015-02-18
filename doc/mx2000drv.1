@@ -2,12 +2,12 @@
 .\"     Title: mx2000drv
 .\"    Author: [see the "Authors" section]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 01/27/2015
+.\"      Date: 02/18/2015
 .\"    Manual: mx2000drv Manual
 .\"    Source: mx2000drv 0.0.1
 .\"  Language: English
 .\"
-.TH "MX2000DRV" "1" "01/27/2015" "mx2000drv 0\&.0\&.1" "mx2000drv Manual"
+.TH "MX2000DRV" "1" "02/18/2015" "mx2000drv 0\&.0\&.1" "mx2000drv Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -93,7 +93,7 @@ when clicked\&.
 .PP
 \fBcolor\fR [\fIRGB\fR]
 .RS 4
-Mouse backlight color as 6\-character hexadecimal
+Mouse backlight color as 6\-character hexadecimal\&. Mostly\&. Each pair of hex characters does not control the overall brightness of that colored LED, but individually controls the fade cycle period of the LED\&. So mixed values will end up with a bit of a color cycle between them\&.
 .RE
 .PP
 \fBbreathe\fR [\fION\fR|\fIOFF\fR]
