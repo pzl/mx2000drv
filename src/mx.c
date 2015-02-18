@@ -231,7 +231,7 @@ MXCOMMAND(get_cycle) {
 
 	err = read_addr(GLOBAL_PROFILE,addr,response);
 	if (err < 0){
-		fprintf(stderr, "Error reading backlight info\n");
+		fprintf(stderr, "Error reading cycle info\n");
 		return -1;
 	}
 
@@ -257,7 +257,7 @@ MXCOMMAND(get_color) {
 
 	err = read_addr(GLOBAL_PROFILE,addr,response);
 	if (err < 0){
-		fprintf(stderr, "Error reading backlight info\n");
+		fprintf(stderr, "Error reading color info\n");
 		return -1;
 	}
 
@@ -305,7 +305,7 @@ MXCOMMAND(get_lit_time) {
 
 	err = read_addr(GLOBAL_PROFILE,addr,response);
 	if (err < 0){
-		fprintf(stderr, "Error reading breathe info\n");
+		fprintf(stderr, "Error reading lit info\n");
 		return -1;
 	}
 
@@ -329,7 +329,7 @@ MXCOMMAND(get_dark_time) {
 
 	err = read_addr(GLOBAL_PROFILE,addr,response);
 	if (err < 0){
-		fprintf(stderr, "Error reading breathe info\n");
+		fprintf(stderr, "Error reading dark info\n");
 		return -1;
 	}
 
@@ -352,7 +352,7 @@ MXCOMMAND(get_pulse_time) {
 
 	err = read_addr(GLOBAL_PROFILE,addr,response);
 	if (err < 0){
-		fprintf(stderr, "Error reading breathe info\n");
+		fprintf(stderr, "Error reading pulse info\n");
 		return -1;
 	}
 
@@ -374,7 +374,7 @@ MXCOMMAND(get_standby_time) {
 
 	err = read_addr(GLOBAL_PROFILE,addr,response);
 	if (err < 0){
-		fprintf(stderr, "Error reading breathe info\n");
+		fprintf(stderr, "Error reading standby info\n");
 		return -1;
 	}
 
