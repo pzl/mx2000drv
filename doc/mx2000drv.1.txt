@@ -154,5 +154,5 @@ Save current mouse configuration to file
 Authors
 -------
 
-Dan Panzarella <alsoelp at gmail.com>
+Dan Panzarella <alsoelp@gmail.com>
 
