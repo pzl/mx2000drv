@@ -546,7 +546,70 @@ MXCOMMAND(accel) {
 	return 0;
 }
 
+MXCOMMAND(dpi_value) {
+	int err;
+	unsigned long preset_ul, val_ul;
+	unsigned char addr, value, preset;
+	unsigned char buf[MSG_LEN];
+	char *end;
 
+	addr = DPI_VAL_ADDR;
+	addr += SETTING_ADDR_PROFILE_STEP * target_profile;
+
+	err = read_addr(GLOBAL_PROFILE,addr,buf);
+	if (err < 0){
+		fprintf(stderr, "Error reading dpi info\n");
+		return -1;
+	}
+
+	if (argc < 1) {
+		fprintf(stderr, "Error: invalid number of arguments for dpi. Requires preset\n");
+		return -1;
+	}
+
+	preset_ul = strtoul(argv[0],&end,10);
+	if (*end != '\0') {
+		fprintf(stderr, "Error: failed to parse preset input for dpi\n");
+		return -1;
+	}
+	if (preset_ul < 1 || preset_ul > 4) {
+		fprintf(stderr, "Error: DPI preset number out of range (1-4).\n");
+		return -1;
+	}
+	preset = (unsigned char) preset_ul;
+
+
+	if (argc == 1) {
+		value = buf[3+preset];
+		printf("%d\n", value*100);
+	} else {
+		val_ul = strtoul(argv[1],&end,10);
+		if (*end != '\0') {
+			fprintf(stderr, "Error: failed to parse dpi value input\n");
+			return -1;
+		}
+
+		if (val_ul < 100 || val_ul > 5600) {
+			fprintf(stderr, "Error: dpi value out of range (100-5600)\n");
+			return -1;
+		}
+		if (val_ul % 100 != 0) {
+			fprintf(stderr, "Error: dpi value must be in increments of 100\n");
+			return -1;
+		}
+		value = (unsigned char) (val_ul/100);
+
+		buf[3+preset] = value;
+
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		if (err < 0){
+			fprintf(stderr, "Error writing dpi info\n");
+			return -1;
+		}		
+	}
+
+	return 0;
+}
 
 
 MXCOMMAND(change_poll) {

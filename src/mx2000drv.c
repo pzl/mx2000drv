@@ -245,6 +245,32 @@ int main(int argc, char **argv) {
 			}
 		}
 	} else if (strcmp(command,"dpi") == 0 ) {
+		action = dpi_value;
+		if (n_addtl_cmds == 0) {
+			fprintf(stderr, "Invalid number of arguments. 'dpi' requires preset number to be specified (1-4)\n");
+			HELP(-2);
+		}
+
+		int preset = atoi(sec_cmd);
+		if (preset < 1 || preset > 4) {
+			fprintf(stderr, "Invalid argument: preset must be in range 1-4\n");
+			HELP(-2);
+		}
+
+		if (n_addtl_cmds == 2) {
+			int value = atoi(third_cmd);
+			if (value < 100 || value > 5600) {
+				fprintf(stderr, "Error: value out of range. dpi value must be between 100 and 5600\n");
+				HELP(-2);
+			}
+			if (value % 100 != 0) {
+				fprintf(stderr, "Error: value must be an even multiple of 100\n");
+				HELP(-2);
+			}
+		} else if (n_addtl_cmds > 2) {
+			fprintf(stderr, "Invalid number of arguments (too many)!\n");
+			HELP(-2);
+		}
 
 	} else if (strcmp(command,"poll") == 0 ) {
 		if (n_addtl_cmds == 0){

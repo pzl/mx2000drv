@@ -93,7 +93,7 @@ These commands require the *-p* option when used with any command except *profil
 	The mouse acceleration in milliseconds. Min: 0, Max: 255.
 
 *dpi* 'PRESET' ['VALUE']::
-	'PRESET' must be a number 1-4. 'VALUE' must be between 100 and 5600 in increments of 100
+	Sets the resolution of a given DPI preset. 'PRESET' must be a number 1-4. 'VALUE' must be between 100 and 5600 in increments of 100
 
 ////
 todo:
