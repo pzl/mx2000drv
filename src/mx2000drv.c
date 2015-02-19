@@ -273,23 +273,19 @@ int main(int argc, char **argv) {
 		}
 
 	} else if (strcmp(command,"poll") == 0 ) {
-		if (n_addtl_cmds == 0){
-			action = print_poll;
+		action = poll_rates;
+		if (n_addtl_cmds > 1){
+			fprintf(stderr, "Invalid number of arguments for poll command.\n");
+			HELP(-2);
 		} else if (n_addtl_cmds == 1) {
-			if (strcmp(argv[optind+1],"1000") == 0 ||
-			    strcmp(argv[optind+1],"500") == 0 ||
-			    strcmp(argv[optind+1],"250") == 0 ||
-			    strcmp(argv[optind+1],"125") == 0) {
-				action = change_poll;
-			} else {
-				fprintf(stderr, "Invalid polling rate '%s'. Must be one of: 1000,500,250,125\n", argv[optind+1]);
+			if (strcmp(sec_cmd,"1000") != 0 &&
+			    strcmp(sec_cmd,"500") != 0 &&
+			    strcmp(sec_cmd,"250") != 0 &&
+			    strcmp(sec_cmd,"125") != 0) {
+				fprintf(stderr, "Invalid polling rate '%s'. Must be one of: 1000,500,250,125\n", sec_cmd);
 				exit(-2);
 			}
-		} else {
-			fprintf(stderr, "invalid number of arguments for 'poll' command\n");
-			HELP(-2);
 		}
-
 	} else if (strcmp(command,"reset") == 0 ) {
 		action = factory_reset;
 	} else if (strcmp(command,"dump") == 0 ) {

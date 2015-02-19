@@ -565,142 +565,75 @@ MXCOMMAND(dpi_value) {
 	return 0;
 }
 
-MXCOMMAND(print_poll) {
-	int err, poll;
-	unsigned char rates[2];
 
-	(void) argc;
-	(void) argv;
-
-	err = get_poll_rates(rates);
-	if (err < 0){
-		return err;
-	}
-
-
-	if (target_profile == 0) {
-		poll = (int) rates[0] >> 4;
-	} else if (target_profile == 1) {
-		poll = (int) rates[0] & 0x0F;
-	} else if (target_profile == 2) {
-		poll = (int) rates[1] >> 4;
-	} else {
-		poll = (int) rates[1] & 0x0F;
-	}
-
-	switch (poll) {
-		case 0:
-			poll = 125;
-			break;
-		case 1:
-			poll = 250;
-			break;
-		case 2:
-			poll = 500;
-			break;
-		case 3:
-			poll = 1000;
-			break;
-		default:
-			poll = 0;
-			break;
-	}
-
-	printf("%dHz\n", poll);
-	return 0;
-}
-
-
-MXCOMMAND(change_poll) {
 	int err;
-	long poll_l;
-	char *end;
-	unsigned char poll_uc;
-	unsigned char rates[2],
-				  response[MSG_LEN],
-				  command[MSG_LEN] = {
-		GLOBAL_PREFIX, ADMIN_POLL_RATE, ADMIN_WRITE, 0x00, 0x00, 0x00, 0x00, 0x00
-	};
 
-	(void) argc;
-
-	poll_l = strtol(argv[0], &end, 10);
-	if (*end != '\0') {
-		fprintf(stderr, "Error: failed to change poll rate, input was not valid number\n");
 		return -1;
 	}
 
-
-	switch (poll_l) {
-		case 1000:
-			poll_uc = 3;
-			break;
-		case 500:
-			poll_uc = 2;
-			break;
-		case 250:
-			poll_uc = 1;
-			break;
-		case 125:
-			poll_uc = 0;
-			break;
-		default:
-			fprintf(stderr, "Error: invalid poll rate given. Must be one of: 1000,500,250,125\n");
 			return -1;
+
 	}
 
-	err = get_poll_rates(rates);
-	if (err < 0) {
+
+
+MXCOMMAND(poll_rates) {
+	int err;
+	unsigned char rates[2];
+	unsigned char poll;
+
+	err = change_poll_rates(ADMIN_READ,rates);
+	if (err < 0){
 		return err;
 	}
 
-
-
-	if (target_profile == 0) {
-		rates[0] &= 0x0F; //clear old high bits
-		rates[0] ^= (poll_uc << 4); //set high bits
-	} else if (target_profile == 1) {
-		rates[0] &= 0xF0; //clear low bits
-		rates[0] ^= poll_uc; //set low bits
-	} else if (target_profile == 2) {
-		rates[1] &= 0x0F; //clear old high bits
-		rates[1] ^= (poll_uc << 4); //set high bits
+	if (argc == 0) {
+		int poll_i;
+		switch(target_profile) {
+			case 0: poll = rates[0] & 0x0F; break;
+			case 1: poll = rates[0] >> 4; break;
+			case 2: poll = rates[1] & 0x0F; break;
+			case 3: poll = rates[1] >> 4; break;
+			default: poll = 5; break;
+		}
+		switch (poll) {
+			case 0: poll_i = 125; break;
+			case 1: poll_i = 250; break;
+			case 2: poll_i = 500; break;
+			case 3: poll_i = 1000; break;
+			default: poll_i = 0; break;
+		}
+		printf("%dHz\n", poll_i);
 	} else {
-		rates[1] &= 0xF0; //clear low bits
-		rates[1] ^= poll_uc; //set low bits
+		unsigned long poll_ul;
+		char *end;
+		poll_ul = strtoul(argv[0],&end,10);
+		if (*end != '\0') {
+			fprintf(stderr, "Error: failed to change poll rate, input was not valid number\n");
+			return -1;
+		}
+		switch (poll_ul) {
+			case 1000: poll = 3; break;
+			case 500: poll = 2; break;
+			case 250: poll = 1; break;
+			case 125: poll = 0; break;
+			default:
+				fprintf(stderr, "Error: invalid poll rate given. Must be one of: 1000,500,250,125\n");
+				return -1;
+		}
+		switch(target_profile) {
+			case 0: rates[0] = (rates[0] & 0xF0) | poll; break;
+			case 1: rates[0] = (rates[0] & 0x0F) | (poll << 4); break;
+			case 2: rates[1] = (rates[1] & 0xF0) | poll; break;
+			case 3: rates[1] = (rates[1] & 0x0F) | (poll << 4); break;
+		}
+
+		err = change_poll_rates(ADMIN_WRITE,rates);
+		if (err < 0){
+			fprintf(stderr, "Error writing poll rates\n");
+			return -1;
+		}
 	}
-
-
-	command[3] = rates[0];
-	command[4] = rates[1];
-
-
-	err = send_command(command);
-	if (err < 0){
-		fprintf(stderr, "Error setting poll rate (command)\n");
-		return -1;
-	}
-	err = read_back(response);
-	if (err < 0){
-		fprintf(stderr, "Error setting poll rate (response)\n");
-		return -1;
-	}
-
-	if (response[0] != GLOBAL_PREFIX ||
-	    response[1] != ADMIN_POLL_RATE ||
-	    response[2] != 0x00 ||
-	    response[5] != 0x00 ||
-	    response[6] != 0x00 ||
-	    response[7] != 0x00){
-		fprintf(stderr, "Warn: unknown extra data received when setting poll rate\n");
-	}
-
-
-	if (response[3] != rates[0] ||
-	    response[4] != rates[1]) {
-		fprintf(stderr, "Poll rates may not have been set properly\n");
-	}
-
 	return 0;
 }
 
@@ -708,12 +641,9 @@ MXCOMMAND(change_poll) {
 MXCOMMAND(read_info) {
 	FILE *fp;
 	int err, i;
+	unsigned char extras[2];
 	unsigned char *buf,
-				  *bufp,
-				  response[MSG_LEN],
-				  stg_read[MSG_LEN] = {
-		GLOBAL_PREFIX, ADMIN_DPI_PRE, ADMIN_READ, 0x00, 0x00, 0x00, 0x00, 0x00
-	};
+				  *bufp;
 
 	(void) target_profile;
 
@@ -729,7 +659,6 @@ MXCOMMAND(read_info) {
 	}
 
 	buf = malloc(sizeof(unsigned char)*BUF_SIZE);
-
 	bufp = buf;
 
 	/* read macro memory */
@@ -751,8 +680,8 @@ MXCOMMAND(read_info) {
 
 
 	/* read polling rates */
-	err = get_poll_rates(response);
-	memcpy(bufp, response, 2);
+	err = change_poll_rates(ADMIN_READ,extras);
+	memcpy(bufp, extras, 2);
 	bufp += 2;
 
 	/* get active profile */
@@ -1048,24 +977,35 @@ int set_profile(unsigned char profile) {
 }
 
 /*
+	if rw is ADMIN_READ:
 	rates should already have allocated
 	enough space for TWO (2) uchars
 */
-int get_poll_rates(unsigned char *rates){
+int change_poll_rates(unsigned char rw, unsigned char *rates){
 	int err;
 	unsigned char response[MSG_LEN],
 				  command[MSG_LEN] = {
-		GLOBAL_PREFIX, ADMIN_POLL_RATE, ADMIN_READ, 0x00, 0x00, 0x00, 0x00, 0x00
+		GLOBAL_PREFIX, ADMIN_POLL_RATE, rw, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
+
+	if (rw != ADMIN_WRITE && rw != ADMIN_READ) {
+		fprintf(stderr, "Error: poll_rates expects valid READ or WRITE command\n");
+	}
+
+
+	if (rw == ADMIN_WRITE) {
+		command[3] = rates[0];
+		command[4] = rates[1];
+	}
 
 	err = send_command(command);
 	if (err < 0){
-		fprintf(stderr, "Error getting poll rate (command)\n");
+		fprintf(stderr, "Error sending poll rate command\n");
 		return -1;
 	}
 	err = read_back(response);
 	if (err < 0){
-		fprintf(stderr, "Error getting poll rate (response)\n");
+		fprintf(stderr, "Error getting poll rate response\n");
 		return -1;
 	}
 
@@ -1078,8 +1018,14 @@ int get_poll_rates(unsigned char *rates){
 		fprintf(stderr, "Warn: unknown extra data received when getting poll rate\n");
 	}
 
-	rates[0] = response[3];
-	rates[1] = response[4];
+	if (rw == ADMIN_READ) {
+		rates[0] = response[3];
+		rates[1] = response[4];
+	} else {
+		if (response[3] != rates[0] || response[4] != rates[1]) {
+			fprintf(stderr, "Poll rates may not have been changed. Mouse did not acknowledge new settings\n");
+		}		
+	}
 
 	return 0;
 }

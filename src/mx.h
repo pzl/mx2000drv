@@ -109,8 +109,7 @@ MXCOMMAND(load_info);
 MXCOMMAND(factory_reset);
 MXCOMMAND(print_profile);
 MXCOMMAND(change_profile);
-MXCOMMAND(print_poll);
-MXCOMMAND(change_poll);
+MXCOMMAND(poll_rates);
 MXCOMMAND(backlight);
 MXCOMMAND(cycle);
 MXCOMMAND(color);
@@ -133,7 +132,7 @@ int set_addr(unsigned char profile, unsigned char addr, unsigned char *buf); /* 
 
 unsigned char get_active_profile(void);
 int set_profile(unsigned char);
-int get_poll_rates(unsigned char *);
+int change_poll_rates(unsigned char rw, unsigned char *);
 
 int mouse_sleep(void);
 int mouse_wake(void);
