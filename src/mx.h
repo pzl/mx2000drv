@@ -34,6 +34,8 @@
 #define DPI_VAL_ADDR 0xE0
 
 
+#define ADMIN_WRITE 0x0F
+#define ADMIN_READ 0x00
 
 #define BACKLIGHT_ENABLED_MSK (1 << 7)
 #define BREATHE_ENABLED_MSK 0x70

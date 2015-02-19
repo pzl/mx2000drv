@@ -45,52 +45,6 @@ MXCOMMAND(change_profile) {
 	return err;
 }
 
-MXCOMMAND(print_poll) {
-	int err, poll;
-	unsigned char rates[2];
-
-	(void) argc;
-	(void) argv;
-
-	err = get_poll_rates(rates);
-	if (err < 0){
-		return err;
-	}
-
-
-	if (target_profile == 0) {
-		poll = (int) rates[0] >> 4;
-	} else if (target_profile == 1) {
-		poll = (int) rates[0] & 0x0F;
-	} else if (target_profile == 2) {
-		poll = (int) rates[1] >> 4;
-	} else {
-		poll = (int) rates[1] & 0x0F;
-	}
-
-	switch (poll) {
-		case 0:
-			poll = 125;
-			break;
-		case 1:
-			poll = 250;
-			break;
-		case 2:
-			poll = 500;
-			break;
-		case 3:
-			poll = 1000;
-			break;
-		default:
-			poll = 0;
-			break;
-	}
-
-	printf("%dHz\n", poll);
-	return 0;
-}
-
-
 MXCOMMAND(backlight) {
 	int err;
 	unsigned char addr;
@@ -611,6 +565,51 @@ MXCOMMAND(dpi_value) {
 	return 0;
 }
 
+MXCOMMAND(print_poll) {
+	int err, poll;
+	unsigned char rates[2];
+
+	(void) argc;
+	(void) argv;
+
+	err = get_poll_rates(rates);
+	if (err < 0){
+		return err;
+	}
+
+
+	if (target_profile == 0) {
+		poll = (int) rates[0] >> 4;
+	} else if (target_profile == 1) {
+		poll = (int) rates[0] & 0x0F;
+	} else if (target_profile == 2) {
+		poll = (int) rates[1] >> 4;
+	} else {
+		poll = (int) rates[1] & 0x0F;
+	}
+
+	switch (poll) {
+		case 0:
+			poll = 125;
+			break;
+		case 1:
+			poll = 250;
+			break;
+		case 2:
+			poll = 500;
+			break;
+		case 3:
+			poll = 1000;
+			break;
+		default:
+			poll = 0;
+			break;
+	}
+
+	printf("%dHz\n", poll);
+	return 0;
+}
+
 
 MXCOMMAND(change_poll) {
 	int err;
@@ -620,7 +619,7 @@ MXCOMMAND(change_poll) {
 	unsigned char rates[2],
 				  response[MSG_LEN],
 				  command[MSG_LEN] = {
-		0xb3, 0x22, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00
+		0xb3, 0x22, ADMIN_WRITE, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
 	(void) argc;
@@ -1062,7 +1061,7 @@ int get_poll_rates(unsigned char *rates){
 	int err;
 	unsigned char response[MSG_LEN],
 				  command[MSG_LEN] = {
-		0xb3, 0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+		0xb3, 0x22, ADMIN_READ, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
 	err = send_command(command);
