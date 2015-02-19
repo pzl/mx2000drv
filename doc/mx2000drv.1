@@ -2,12 +2,12 @@
 .\"     Title: mx2000drv
 .\"    Author: [see the "Authors" section]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 02/18/2015
+.\"      Date: 02/19/2015
 .\"    Manual: mx2000drv Manual
 .\"    Source: mx2000drv 0.0.1
 .\"  Language: English
 .\"
-.TH "MX2000DRV" "1" "02/18/2015" "mx2000drv 0\&.0\&.1" "mx2000drv Manual"
+.TH "MX2000DRV" "1" "02/19/2015" "mx2000drv 0\&.0\&.1" "mx2000drv Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -77,18 +77,22 @@ The active mouse profile, an integer 1\-4\&. The
 option is ignored for this setting\&.
 .RE
 .PP
-\fBbutton\fR \fIBUTTON NUM\fR [\fIASSIGNMENT\fR]
+\fBbutton\fR \fINUM\fR [\fIASSIGNMENT\fR]
 .RS 4
 Map the specified button number to perform
 \fIASSIGNMENT\fR
-when clicked\&.
+when clicked\&. See
+\fBButton Numbers\fR
+for the assignment of mouse buttons to numbers\&.
 .RE
 .PP
-\fBmacro\fR \fIBUTTON NUM\fR [\fISEQUENCE\fR]
+\fBmacro\fR \fINUM\fR [\fISEQUENCE\fR]
 .RS 4
 Map button to perform key
 \fISEQUENCE\fR
-when clicked\&.
+when clicked\&. See
+\fBButton Numbers\fR
+for the assignment of mouse buttons to numbers\&.
 .RE
 .PP
 \fBcolor\fR [\fIRGB\fR]
@@ -155,7 +159,7 @@ The mouse acceleration in milliseconds\&. Min: 0, Max: 255\&.
 \fIPRESET\fR
 must be a number 1\-4\&.
 \fIVALUE\fR
-must be between 100 and 1600 in increments of 100
+must be between 100 and 5600 in increments of 100
 .RE
 .PP
 \fBpoll\fR [\fIRATE\fR]
@@ -180,6 +184,55 @@ Save or load the entire mouse configuration including all settings, macros, and 
 dump \fIFILE\fR
 .sp
 load \fIFILE\fR
+.RE
+.SH "BUTTON NUMBERS"
+.PP
+\fB1\fR \fILeft Click\fR
+.RS 4
+The primary mouse button, on the left side of the scroll wheel, along the DPI lights\&.
+.RE
+.PP
+\fB2\fR \fIRight Click\fR
+.RS 4
+The secondary mouse button, on the right side of the scroll wheel\&.
+.RE
+.PP
+\fB3\fR \fIScroll Wheel\fR
+.RS 4
+When the scroll wheel is pressed down like a button\&.
+.RE
+.PP
+\fB4\fR \fIForward Thumb\fR
+.RS 4
+On the left side of the mouse, this is part of the upper pair of buttons next to each other\&. This button is the one closer to the
+\fBfront\fR
+of the mouse\&.
+.RE
+.PP
+\fB5\fR \fIBackward Thumb\fR
+.RS 4
+On the left side of the mouse, this is part of the upper pair of buttons next to each other\&. This button is the one closer to the
+\fBback\fR
+of the mouse\&.
+.RE
+.PP
+\fB6\fR \fIUp\fR
+.RS 4
+Directly behind the scroll wheel is a pair of buttons\&. This is the one closer to the wheel, pointing towards the
+\fBfront\fR
+of the mouse\&.
+.RE
+.PP
+\fB7\fR \fIDown\fR
+.RS 4
+Directly behind the scroll wheel is a pair of buttons\&. This is the one farther from the wheel, pointing towards the
+\fBback\fR
+of the mouse\&.
+.RE
+.PP
+\fB8\fR \fILower Thumb\fR
+.RS 4
+On the left side of the mouse, this button is the lowest of the three\&. It is the closest to the 4 green LEDs indicating DPI selection, towards the front of the mouse\&.
 .RE
 .SH "EXAMPLE"
 .sp

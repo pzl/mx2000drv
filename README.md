@@ -1,4 +1,4 @@
-**mx2000drv** is a Linux driver for the Perixx 2000IIB gaming mouse. It is capable of setting all the configurations for the mouse (remapping buttons, backlight colors and times, macros, sensitivity, DPI) and saving to profiles in the onboard memory.
+**mx2000drv** is a Linux driver for the Perixx MX-2000 series gaming mice. It is capable of setting all the configurations for the mouse (remapping buttons, backlight colors and times, macros, sensitivity, DPI) and saving to profiles in the onboard memory.
 
 Installation
 ----------------
