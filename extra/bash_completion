@@ -3,7 +3,7 @@ _mx2000drv() {
 	COMPREPLY=()
 	cur="${COMP_WORDS[COMP_CWORD]}"
 	prev="${COMP_WORDS[COMP_CWORD-1]}"
-	commands="profile button macro color breathe cycle lit dark pulse standby backlight sensitivity accel dpi poll reset dump load"
+	commands="profile button macro color breathe cycle lit dark pulse standby backlight sensitivity accel dpi dpiset poll reset dump load"
 	opts="-h --help -p --profile -v --verbose -V --version"
 
 

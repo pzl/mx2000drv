@@ -566,15 +566,56 @@ MXCOMMAND(dpi_value) {
 }
 
 
+MXCOMMAND(dpi_active) {
 	int err;
+	unsigned char presets[2];
+	unsigned char active;
 
+	err = dpi_presets(ADMIN_READ,presets);
+	if (err < 0) {
+		fprintf(stderr, "Error retrieving current DPI presets\n");
 		return -1;
 	}
 
+	if (argc == 0) {
+		switch (target_profile) {
+			case 0: active = presets[0] & 0x0F; break;
+			case 1: active = presets[0] >> 4; break;
+			case 2: active = presets[1] & 0x0F; break;
+			case 3: active = presets[1] >> 4; break;
+			default: active=0; break;
+		}
+		printf("%d\n", active+1);
+	} else {
+		unsigned long active_ul;
+		char *end;
+		active_ul = strtoul(argv[0],&end,10);
+		if (*end != '\0') {
+			fprintf(stderr, "Error: failed to change DPI preset, input was not valid number\n");
 			return -1;
+		}
+		if (active_ul < 1 || active_ul > 4) {
+			fprintf(stderr, "Error: DPI preset out of range (1-4).\n");
+			return -1;
+		}
+		active = (unsigned char) active_ul-1;
+		
+		switch (target_profile) {
+			case 0: presets[0] = (presets[0] & 0xF0) | active; break;
+			case 1: presets[0] = (presets[0] & 0x0F) | (active << 4); break;
+			case 2: presets[1] = (presets[1] & 0xF0) | active; break;
+			case 3: presets[1] = (presets[1] & 0x0F) | (active << 4); break;
+		}
 
+		err = dpi_presets(ADMIN_WRITE,presets);
+		if (err < 0) {
+			fprintf(stderr, "Error setting DPI presets\n");
+			return -1;
+		}
 	}
 
+	return 0;
+}
 
 
 MXCOMMAND(poll_rates) {
@@ -673,9 +714,8 @@ MXCOMMAND(read_info) {
 
 
 	/* read DPI settings */
-	err = send_command(stg_read);
-	err = read_back(response);
-	memcpy(bufp, response+3, 2);
+	err = dpi_presets(ADMIN_READ,extras);
+	memcpy(bufp, extras, 2);
 	bufp += 2;
 
 
@@ -1029,6 +1069,61 @@ int change_poll_rates(unsigned char rw, unsigned char *rates){
 
 	return 0;
 }
+
+
+/*
+	presets should already have allocated
+	enough space for TWO (2) uchars
+*/
+int dpi_presets(unsigned char rw, unsigned char *presets) {
+	int err;
+	unsigned char response[MSG_LEN],
+				  command[MSG_LEN] = {
+		GLOBAL_PREFIX, ADMIN_DPI_PRE, rw, 0x00, 0x00, 0x00, 0x00, 0x00
+	};
+
+	if (rw != ADMIN_WRITE && rw != ADMIN_READ) {
+		fprintf(stderr, "Error: dpi_presets expects valid READ or WRITE command\n");
+	}
+
+
+	if (rw == ADMIN_WRITE) {
+		command[3] = presets[0];
+		command[4] = presets[1];
+	}
+
+	err = send_command(command);
+	if (err < 0){
+		fprintf(stderr, "Error sending dpi preset command\n");
+		return -1;
+	}
+	err = read_back(response);
+	if (err < 0){
+		fprintf(stderr, "Error getting dpi preset response\n");
+		return -1;
+	}
+
+	if (response[0] != GLOBAL_PREFIX ||
+	    response[1] != ADMIN_DPI_PRE ||
+	    response[2] != 0x00 ||
+	    response[5] != 0x00 ||
+	    response[6] != 0x00 ||
+	    response[7] != 0x00){
+		fprintf(stderr, "Warn: unknown extra data received when getting dpi presets\n");
+	}
+
+	if (rw == ADMIN_READ){
+		presets[0] = response[3];
+		presets[1] = response[4];
+	} else {
+		if (response[3] != presets[0] || response[4] != presets[1]) {
+			fprintf(stderr, "DPI presets may not have been changed. Mouse did not acknowledge new settings\n");
+		}		
+	}
+
+	return 0;
+}
+
 
 int mouse_sleep(void) {
 	int err;

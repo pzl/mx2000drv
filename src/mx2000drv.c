@@ -271,7 +271,18 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Invalid number of arguments (too many)!\n");
 			HELP(-2);
 		}
-
+	} else if (strcmp(command,"dpiset") == 0 ) {
+		action = dpi_active;
+		if (n_addtl_cmds > 1) {
+			fprintf(stderr, "Invalid number of arguments for dpiset command.\n");
+			HELP(-2);
+		} else if (n_addtl_cmds == 1) {
+			int val = atoi(sec_cmd);
+			if (val < 1 || val > 4) {
+				fprintf(stderr, "Error, value out of range (1-4)\n");
+				exit(-2);
+			}
+		}
 	} else if (strcmp(command,"poll") == 0 ) {
 		action = poll_rates;
 		if (n_addtl_cmds > 1){

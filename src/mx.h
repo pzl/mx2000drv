@@ -121,6 +121,7 @@ MXCOMMAND(standby_time);
 MXCOMMAND(sensitivity);
 MXCOMMAND(accel);
 MXCOMMAND(dpi_value);
+MXCOMMAND(dpi_active);
 
 
 /*
@@ -133,6 +134,7 @@ int set_addr(unsigned char profile, unsigned char addr, unsigned char *buf); /* 
 unsigned char get_active_profile(void);
 int set_profile(unsigned char);
 int change_poll_rates(unsigned char rw, unsigned char *);
+int dpi_presets(unsigned char rw, unsigned char *);
 
 int mouse_sleep(void);
 int mouse_wake(void);

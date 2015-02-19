@@ -95,11 +95,8 @@ These commands require the *-p* option when used with any command except *profil
 *dpi* 'PRESET' ['VALUE']::
 	Sets the resolution of a given DPI preset. 'PRESET' must be a number 1-4. 'VALUE' must be between 100 and 5600 in increments of 100
 
-////
-todo:
-select/fetch an active dpi preset
-
-////
+*dpiset* ['PRESET']::
+	Sets or retrieves the active DPI preset (1-4).
 
 *poll* ['RATE']::
 	Mouse polling rate in Hz: 125, 250, 500, 1000
