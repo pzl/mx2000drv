@@ -12,9 +12,16 @@
 #define NUM_PROFILES 4
 #define GLOBAL_PROFILE 5
 
+
+#define GLOBAL_PREFIX 0xB3
+
 #define ADDR_START 0x00
 #define ADDR_STOP 0xFC
 #define ADDR_STEP 0x04
+
+#define ADDR_WRITE 0x01
+#define ADDR_READ 0x02
+#define SEC_ERASE 0x03
 
 
 /* gap between repeated settings for next profile */
@@ -34,8 +41,17 @@
 #define DPI_VAL_ADDR 0xE0
 
 
+/* command types, second byte after b3 */
+#define ADMIN_POLL_RATE 0x22
+#define ADMIN_DPI_PRE 0x21
+#define ADMIN_GENERAL 0x20
+#define ADMIN_PROFILE 0x08
+
+/* third byte, command actions */
 #define ADMIN_WRITE 0x0F
 #define ADMIN_READ 0x00
+#define ADMIN_SLEEP 0x84
+#define ADMIN_WAKE 0x80
 
 #define BACKLIGHT_ENABLED_MSK (1 << 7)
 #define BREATHE_ENABLED_MSK 0x70

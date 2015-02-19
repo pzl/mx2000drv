@@ -619,7 +619,7 @@ MXCOMMAND(change_poll) {
 	unsigned char rates[2],
 				  response[MSG_LEN],
 				  command[MSG_LEN] = {
-		0xb3, 0x22, ADMIN_WRITE, 0x00, 0x00, 0x00, 0x00, 0x00
+		GLOBAL_PREFIX, ADMIN_POLL_RATE, ADMIN_WRITE, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
 	(void) argc;
@@ -686,8 +686,8 @@ MXCOMMAND(change_poll) {
 		return -1;
 	}
 
-	if (response[0] != 0xb3 ||
-	    response[1] != 0x22 ||
+	if (response[0] != GLOBAL_PREFIX ||
+	    response[1] != ADMIN_POLL_RATE ||
 	    response[2] != 0x00 ||
 	    response[5] != 0x00 ||
 	    response[6] != 0x00 ||
@@ -712,7 +712,7 @@ MXCOMMAND(read_info) {
 				  *bufp,
 				  response[MSG_LEN],
 				  stg_read[MSG_LEN] = {
-		0xb3, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+		GLOBAL_PREFIX, ADMIN_DPI_PRE, ADMIN_READ, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
 	(void) target_profile;
@@ -859,7 +859,7 @@ MXCOMMAND(factory_reset) {
 int read_addr(int profile, unsigned char addr, unsigned char *response){
 	int err;
 	unsigned char command[MSG_LEN] = {
-		0xb3, 0x02, addr, 0x04, 0x00, 0x00, 0x00, 0x00
+		GLOBAL_PREFIX, ADDR_READ, addr, 0x04, 0x00, 0x00, 0x00, 0x00
 	};
 	command[4] = (unsigned char) profile;
 
@@ -943,19 +943,13 @@ int set_addr(unsigned char profile, unsigned char addr, unsigned char *buf) {
 	int err;
 	unsigned char response[MSG_LEN],
 				  command[MSG_LEN] = {
-		0xb3, 0x01, addr, 0x04, 0x00, 0x00, 0x00, 0x00
+		GLOBAL_PREFIX, ADDR_WRITE, addr, (profile << 4) | 0x04, buf[0], buf[1], buf[2], buf[3]
 	};
 
 	if (profile == NUM_PROFILES || profile > GLOBAL_PROFILE) {
 		fprintf(stderr, "Error: invalid section number to write to\n");
 		return -1;
 	}
-
-	command[3] |= profile << 4;
-	command[4] = buf[0];
-	command[5] = buf[1];
-	command[6] = buf[2];
-	command[7] = buf[3];
 
 	err = send_command(command);
 	if (err < 0){
@@ -969,7 +963,7 @@ int set_addr(unsigned char profile, unsigned char addr, unsigned char *buf) {
 	}
 
 
-	if (response[0] != 0xb3 ||
+	if (response[0] != GLOBAL_PREFIX ||
 	    response[1] != 0x01 ||
 	    response[2] != 0x01){
 		fprintf(stderr, "Warn: unknown extra data received when writing addr\n");
@@ -993,7 +987,7 @@ unsigned char get_active_profile(void) {
 	int err;
 	unsigned char response[MSG_LEN],
 				  command[MSG_LEN] = {
-		0xb3, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+		GLOBAL_PREFIX, ADMIN_GENERAL, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
 	err = send_command(command);
@@ -1015,7 +1009,7 @@ int set_profile(unsigned char profile) {
 	int err;
 	unsigned char response[MSG_LEN],
 				  command[MSG_LEN] = {
-		0xb3, 0x20, 0x08, profile, 0x00, 0x00, 0x00, 0x00
+		GLOBAL_PREFIX, ADMIN_GENERAL, ADMIN_PROFILE, profile, 0x00, 0x00, 0x00, 0x00
 	};
 
 
@@ -1040,8 +1034,8 @@ int set_profile(unsigned char profile) {
 		return -1;
 	}
 
-	if (response[0] != 0xb3 ||
-	    response[1] != 0x20 ||
+	if (response[0] != GLOBAL_PREFIX ||
+	    response[1] != ADMIN_GENERAL ||
 	    response[2] != 0x00 ||
 	    response[5] != 0x00 ||
 	    response[6] != 0x0e ||
@@ -1061,7 +1055,7 @@ int get_poll_rates(unsigned char *rates){
 	int err;
 	unsigned char response[MSG_LEN],
 				  command[MSG_LEN] = {
-		0xb3, 0x22, ADMIN_READ, 0x00, 0x00, 0x00, 0x00, 0x00
+		GLOBAL_PREFIX, ADMIN_POLL_RATE, ADMIN_READ, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
 	err = send_command(command);
@@ -1075,8 +1069,8 @@ int get_poll_rates(unsigned char *rates){
 		return -1;
 	}
 
-	if (response[0] != 0xb3 ||
-	    response[1] != 0x22 ||
+	if (response[0] != GLOBAL_PREFIX ||
+	    response[1] != ADMIN_POLL_RATE ||
 	    response[2] != 0x00 ||
 	    response[5] != 0x00 ||
 	    response[6] != 0x00 ||
@@ -1094,7 +1088,7 @@ int mouse_sleep(void) {
 	int err;
 	unsigned char response[MSG_LEN],
 				  command[MSG_LEN] = {
-		0xb3, 0x20, 0x84, 0x00, 0x00, 0x00, 0x00, 0x00
+		GLOBAL_PREFIX, ADMIN_GENERAL, ADMIN_SLEEP, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
 	err = send_command(command);
@@ -1112,7 +1106,7 @@ int mouse_wake(void) {
 	int err;
 	unsigned char response[MSG_LEN],
 				  command[MSG_LEN] = {
-		0xb3, 0x20, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00
+		GLOBAL_PREFIX, ADMIN_GENERAL, ADMIN_WAKE, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
 	err = send_command(command);
@@ -1168,7 +1162,7 @@ int erase_section(unsigned char section_num) {
 	int err;
 	unsigned char response[MSG_LEN],
 				  command[MSG_LEN] = {
-		0xb3, 0x03, 0x00, 0xff, 0x55, 0xaa, 0x55, 0x00
+		GLOBAL_PREFIX, SEC_ERASE, 0x00, 0xff, 0x55, 0xaa, 0x55, 0x00
 	};
 
 	if (section_num == NUM_PROFILES || section_num > GLOBAL_PROFILE){
@@ -1192,8 +1186,8 @@ int erase_section(unsigned char section_num) {
 	}
 
 
-	if (response[0] != 0xb3 ||
-	    response[1] != 0x03 ||
+	if (response[0] != GLOBAL_PREFIX ||
+	    response[1] != SEC_ERASE ||
 	    response[2] != 0x01 ||
 	    response[4] != 0x00 ||
 	    response[5] != 0x00 ||
@@ -1214,7 +1208,7 @@ int write_buf(unsigned char *buf) {
 	int err, i;
 	unsigned char response[MSG_LEN],
 				  command[MSG_LEN] = {
-		0xb3, 0x21, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00
+		GLOBAL_PREFIX, ADMIN_DPI_PRE, ADMIN_WRITE, 0x00, 0x00, 0x00, 0x00, 0x00
 	};
 
 	err = mouse_sleep();
@@ -1245,7 +1239,7 @@ int write_buf(unsigned char *buf) {
 	err = read_back(response);
 
 	/* poll rate */
-	command[1] = 0x22;
+	command[1] = ADMIN_POLL_RATE;
 	command[3] = *buf++;
 	command[4] = *buf++;
 	/* @todo: write poll rate */
