@@ -280,9 +280,10 @@
 
 
 /* ---------- clicks ----------- */
-#define PRIMARY_CLICK 0x8142
-#define SECOND_CLICK  0x8242
-#define WHEEL_CLICK  0x8442
+#define CLICK_PRIMARY    0x8142
+#define CLICK_SECONDARY  0x8242
+#define CLICK_WHEEL      0x8442
+#define CLICK_NONE       0x0142
 
 /* ---------- weird extra keys ----------- */
 #define KEY_NONE 0
@@ -350,25 +351,6 @@
 #define VOL_UP 0xE920 /* XF86AudioRaiseVolume */
 #define VOL_DN 0xEA20 /* XF86AudioLowerVolume */
 
-#define FIRE 0x0085 /* internal mouse operation */
-
-
-
-
-/* -------------- found in macro settings ------------- */
-/* release mouse button? 0x0142 */
-/* special "fire" key? 0x8570 */
-/* repeat? 0x8971 */
-/*  0x */
-/*  0x */
-/*  0x */
-/*  0x */
-/*  0x */
-/*  0x */
-/*  0x */
-/*  0x */
-
-
 
 /* ----- modifier keys for when LSB is 0x00 ------ */
 #define MOD_CTRL  (1 << 0)
@@ -379,21 +361,5 @@
 /* --------
 	end keys 
    -------- */
-
-loops
-
-1  8573
-2  8772
-3  8971
-4  
-5  8971
-7  
-8  
-9  
-10 
-.. 
-54 8574
-
-
 
 #endif
