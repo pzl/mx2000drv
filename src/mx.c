@@ -678,6 +678,51 @@ MXCOMMAND(poll_rates) {
 	return 0;
 }
 
+MXCOMMAND(button) {
+	int err;
+	unsigned long button_num_ul;
+	unsigned char button_num;
+	unsigned char keys[2];
+	char *end;
+
+	button_num_ul = strtoul(argv[0],&end,10);
+	if (*end != '\0') {
+		fprintf(stderr, "Error: button was not a valid number\n");
+		return -1;
+	}
+
+	if (button_num_ul < 1 || button_num_ul > 8) {
+		fprintf(stderr, "Button number '%ld' out of range (1-8)\n", button_num_ul);
+		return -1;
+	}
+	button_num = (unsigned char) button_num_ul;
+
+	if (argc == 1) {
+		err = button_map(ADMIN_READ, target_profile, button_num, keys);
+		if (err < 0){
+			fprintf(stderr, "Error reading button mapping\n");
+			return -1;
+		}
+		printf("Button %d is mapped to 0x%02hx%02hx\n", button_num, keys[0],keys[1]);
+	} else {
+		unsigned long key_input;
+		key_input = strtoul(argv[1],&end,16);
+		if (*end != '\0') {
+			fprintf(stderr, "Error: key value was not a valid number\n");
+			return -1;
+		}
+		keys[0] = (key_input & 0xFF00) >> 8;
+		keys[1] = key_input & 0x00FF;
+		err = button_map(ADMIN_WRITE, target_profile, button_num, keys);
+		if (err < 0){
+			fprintf(stderr, "Error setting button mapping\n");
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
 
 MXCOMMAND(read_info) {
 	FILE *fp;
@@ -1124,6 +1169,54 @@ int dpi_presets(unsigned char rw, unsigned char *presets) {
 	return 0;
 }
 
+int button_map(unsigned char rw, unsigned char profile, unsigned char button_num, unsigned char *keys) {
+	int err;
+	unsigned char addr;
+	unsigned char buf[MSG_LEN];
+
+	addr = BUTTON_ADDR_START;
+	addr += BUTTON_ADDR_PROFILE_STEP * profile;
+
+	/* fall-through intentional to compound addr distance */
+	switch (button_num) {
+		case 7: case 8: addr += BUTTON_ADDR_STEP;
+		case 5: case 6: addr += BUTTON_ADDR_STEP;
+		case 3: case 4: addr += BUTTON_ADDR_STEP;
+	}
+
+	err = read_addr(GLOBAL_PROFILE,addr,buf);
+	if (err < 0){
+		fprintf(stderr, "Error reading button info\n");
+		return -1;
+	}
+
+
+	if (rw == ADMIN_READ) {
+		if (button_num % 2 == 1) {
+			keys[0] = buf[4];
+			keys[1] = buf[5];
+		} else {
+			keys[0] = buf[6];
+			keys[1] = buf[7];
+		}
+	} else {
+
+		if (button_num % 2 == 1) {
+			buf[4] = keys[0];
+			buf[5] = keys[1];
+		} else {
+			buf[6] = keys[0];
+			buf[7] = keys[1];
+		}
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		if (err < 0){
+			fprintf(stderr, "Error setting button info\n");
+			return -1;
+		}
+	}
+
+	return 0;
+}
 
 int mouse_sleep(void) {
 	int err;

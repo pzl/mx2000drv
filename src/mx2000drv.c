@@ -112,7 +112,16 @@ int main(int argc, char **argv) {
 		}
 
 	} else if (strcmp(command,"button") == 0 ) {
-
+		action = button;
+		if (n_addtl_cmds < 1 || n_addtl_cmds > 2) {
+			fprintf(stderr, "Invalid number of arguments\n");
+			HELP(-2);
+		}
+		int button_num = atoi(sec_cmd);
+		if (button_num < 1 || button_num > 8) {
+			fprintf(stderr, "Error: Button number out of range (1-8).\n");
+			HELP(-2);
+		}
 	} else if (strcmp(command,"color") == 0 ) {
 		action = color;
 		if (n_addtl_cmds > 1) {
