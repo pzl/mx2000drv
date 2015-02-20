@@ -742,6 +742,11 @@ MXCOMMAND(macro) {
 	}
 	button_num = (unsigned char) button_num_ul;
 
+	(void) button_keys;
+	(void) button_num;
+	(void) err;
+	(void) argc;
+	(void) target_profile;
 
 	return 0;
 }
