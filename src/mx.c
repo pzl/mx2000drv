@@ -723,6 +723,29 @@ MXCOMMAND(button) {
 	return 0;
 }
 
+MXCOMMAND(macro) {
+	int err;
+	unsigned long button_num_ul;
+	unsigned char button_num;
+	unsigned char button_keys[2];
+	char *end;
+
+	button_num_ul = strtoul(argv[0],&end,10);
+	if (*end != '\0') {
+		fprintf(stderr, "Error: button was not a valid number\n");
+		return -1;
+	}
+
+	if (button_num_ul < 1 || button_num_ul > 8) {
+		fprintf(stderr, "Button number '%ld' out of range (1-8)\n", button_num_ul);
+		return -1;
+	}
+	button_num = (unsigned char) button_num_ul;
+
+
+	return 0;
+}
+
 
 MXCOMMAND(read_info) {
 	FILE *fp;

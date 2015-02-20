@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
 			}
 		}
 	} else if (strcmp(command,"macro") == 0 ) {
-
+		
 	} else if (strcmp(command,"breathe") == 0 ) {
 		action = breathe;
 		if (n_addtl_cmds > 1) {

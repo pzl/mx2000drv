@@ -31,7 +31,7 @@
 
 #define BUTTON_ADDR_START 0x00
 #define MACRO_ADDR_START 0x18
-#define MACRO_OVERFLOW_ADDR_START 0x1C
+#define MACRO_ADDR_NEXT_STEP 0x04
 #define BUTTON_ADDR_STEP 0x04
 
 /* First profile addr of each setting */
@@ -123,6 +123,7 @@ MXCOMMAND(accel);
 MXCOMMAND(dpi_value);
 MXCOMMAND(dpi_active);
 MXCOMMAND(button);
+MXCOMMAND(macro);
 
 
 /*
