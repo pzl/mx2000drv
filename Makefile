@@ -19,11 +19,11 @@ SRCS = $(wildcard $(SRCDIR)/*.c)
 OBJS=$(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 PREFIX ?= /usr
-BINDIR = $(DESTDIR)/$(PREFIX)/bin
-MANDIR = $(DESTDIR)/$(PREFIX)/share/man/man1
-BSHDIR = $(DESTDIR)/$(PREFIX)/share/bash-completion/completions
-ZSHDIR = $(DESTDIR)/$(PREFIX)/share/zsh/site-functions
-UDVDIR = $(DESTDIR)/etc/extra/rules.d
+BINDIR = $(DESTDIR)$(PREFIX)/bin
+MANDIR = $(DESTDIR)$(PREFIX)/share/man/man1
+BSHDIR = $(DESTDIR)$(PREFIX)/share/bash-completion/completions
+ZSHDIR = $(DESTDIR)$(PREFIX)/share/zsh/site-functions
+UDVDIR = $(DESTDIR)/etc/udev/rules.d
 
 
 
