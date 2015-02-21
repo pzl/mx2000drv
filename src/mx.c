@@ -30,6 +30,7 @@ MXCOMMAND(print_profile) {
 	(void) argc;
 	(void) argv;
 	(void) target_profile;
+	(void) verbose;
 
 	profile = get_active_profile();
 	printf("%d\n", profile+1);
@@ -44,6 +45,7 @@ MXCOMMAND(change_profile) {
 
 	(void) argc;
 	(void) target_profile;
+	(void) verbose;
 	
 	profile_l = strtol(argv[0], &end, 10);
 	if (*end != '\0') {
@@ -90,7 +92,7 @@ MXCOMMAND(backlight) {
 			buf[4] &= ~(BACKLIGHT_ENABLED_MSK);
 		}
 
-		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4,verbose);
 		if (err < 0){
 			fprintf(stderr, "Error writing backlight info\n");
 			return -1;
@@ -127,7 +129,7 @@ MXCOMMAND(cycle) {
 			buf[4] &= ~(CYCLE_ENABLED_MSK);
 		}
 
-		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4,verbose);
 		if (err < 0){
 			fprintf(stderr, "Error writing cycle info\n");
 			return -1;
@@ -168,7 +170,7 @@ MXCOMMAND(color) {
 			fprintf(stderr, "Error: failed to change color, input was not valid hex\n");
 			return -1;
 		}
-		err = write_addr(GLOBAL_PROFILE,addr,buf);
+		err = write_addr(GLOBAL_PROFILE,addr,buf,verbose);
 		if (err < 0){
 			fprintf(stderr, "Error writing color info\n");
 			return -1;
@@ -206,7 +208,7 @@ MXCOMMAND(breathe) {
 			buf[4] &= ~(BREATHE_ENABLED_MSK);
 		}
 
-		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4,verbose);
 		if (err < 0){
 			fprintf(stderr, "Error writing breathe info\n");
 			return -1;
@@ -251,7 +253,7 @@ MXCOMMAND(lit_time) {
 		buf[5] &= ~(LIT_TIME_MSK); /* clear higher 4 bits */
 		buf[5] |= (value << 4);
 
-		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4,verbose);
 		if (err < 0){
 			fprintf(stderr, "Error writing lit info\n");
 			return -1;
@@ -296,7 +298,7 @@ MXCOMMAND(dark_time) {
 		buf[5] &= ~(DARK_TIME_MSK); /* clear higher 4 bits */
 		buf[5] |= value;
 
-		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4,verbose);
 		if (err < 0){
 			fprintf(stderr, "Error writing dark info\n");
 			return -1;
@@ -340,7 +342,7 @@ MXCOMMAND(pulse_time) {
 
 		buf[4] = value*4;
 
-		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4,verbose);
 		if (err < 0){
 			fprintf(stderr, "Error writing pulse info\n");
 			return -1;
@@ -383,7 +385,7 @@ MXCOMMAND(standby_time) {
 
 		buf[6] = value*4;
 
-		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4,verbose);
 		if (err < 0){
 			fprintf(stderr, "Error writing standby info\n");
 			return -1;
@@ -464,7 +466,7 @@ MXCOMMAND(sensitivity) {
 
 		buf[axis] = value;
 
-		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4,verbose);
 		if (err < 0){
 			fprintf(stderr, "Error writing sensitivity info\n");
 			return -1;
@@ -508,7 +510,7 @@ MXCOMMAND(accel) {
 
 		buf[7] = value;
 
-		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4,verbose);
 		if (err < 0){
 			fprintf(stderr, "Error writing accel info\n");
 			return -1;
@@ -573,7 +575,7 @@ MXCOMMAND(dpi_value) {
 
 		buf[3+preset] = value;
 
-		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4,verbose);
 		if (err < 0){
 			fprintf(stderr, "Error writing dpi info\n");
 			return -1;
@@ -588,6 +590,8 @@ MXCOMMAND(dpi_active) {
 	int err;
 	unsigned char presets[2];
 	unsigned char active;
+
+	(void) verbose;
 
 	err = dpi_presets(ADMIN_READ,presets);
 	if (err < 0) {
@@ -640,6 +644,8 @@ MXCOMMAND(poll_rates) {
 	int err;
 	unsigned char rates[2];
 	unsigned char poll;
+
+	(void) verbose;
 
 	err = change_poll_rates(ADMIN_READ,rates);
 	if (err < 0){
@@ -716,7 +722,7 @@ MXCOMMAND(button) {
 	button_num = (unsigned char) button_num_ul;
 
 	if (argc == 1) {
-		err = button_map(ADMIN_READ, target_profile, button_num, keys);
+		err = button_map(ADMIN_READ, target_profile, button_num, keys, verbose);
 		if (err < 0){
 			fprintf(stderr, "Error reading button mapping\n");
 			return -1;
@@ -731,7 +737,7 @@ MXCOMMAND(button) {
 		}
 		keys[0] = (key_input & 0xFF00) >> 8;
 		keys[1] = key_input & 0x00FF;
-		err = button_map(ADMIN_WRITE, target_profile, button_num, keys);
+		err = button_map(ADMIN_WRITE, target_profile, button_num, keys, verbose);
 		if (err < 0){
 			fprintf(stderr, "Error setting button mapping\n");
 			return -1;
@@ -765,6 +771,7 @@ MXCOMMAND(macro) {
 	(void) err;
 	(void) argc;
 	(void) target_profile;
+	(void) verbose;
 
 	return 0;
 }
@@ -778,7 +785,7 @@ MXCOMMAND(read_info) {
 				  *bufp;
 
 	(void) target_profile;
-
+	(void) verbose;
 
 	if (argc == 0 || argv[0][0]=='-'){
 		fp = stdout;
@@ -843,6 +850,7 @@ MXCOMMAND(load_info) {
 	unsigned char *buf;
 
 	(void) target_profile;
+	(void) verbose;
 
 	if (argc == 0 || argv[0][0] == '-') {
 		freopen(NULL, "rb", stdin);
@@ -882,6 +890,7 @@ MXCOMMAND(factory_reset) {
 	(void)argc;
 	(void)argv;
 	(void)target_profile;
+	(void) verbose;
 
 	buf = malloc(sizeof(unsigned char)*BUF_SIZE);
 	bufp = buf;
@@ -938,7 +947,7 @@ int read_addr(int profile, unsigned char addr, unsigned char *response){
 	addr: in the range 0x00-0xFC inclusive, in increments of 4
 	buf: array of ADDR_DATA_LEN(4) uchars of data to write
 */
-int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf) {
+int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf, int verbose) {
 	unsigned char cur_prof;
 	unsigned char sec[SEC_SIZE];
 	unsigned char *secp;
@@ -954,7 +963,7 @@ int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf) {
 		return -1;
 	}
 
-	printf("read: data at addr 0x%02hx: %02hx%02hx%02hx%02hx\n",
+	VB_PRINT("read: data at addr 0x%02hx: %02hx%02hx%02hx%02hx\n",
 	       addr,
 	       sec[addr], sec[addr+1],sec[addr+2],sec[addr+3]);
 
@@ -963,7 +972,7 @@ int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf) {
 	secp = sec + addr; /* point to start of data to change */
 	memcpy(secp,buf,ADDR_DATA_LEN);
 
-	printf("write: data at addr 0x%02hx: %02hx%02hx%02hx%02hx\n",
+	VB_PRINT("write: data at addr 0x%02hx: %02hx%02hx%02hx%02hx\n",
 	       addr,
 	       sec[addr], sec[addr+1],sec[addr+2],sec[addr+3]);
 
@@ -1215,7 +1224,7 @@ int dpi_presets(unsigned char rw, unsigned char *presets) {
 	return 0;
 }
 
-int button_map(unsigned char rw, unsigned char profile, unsigned char button_num, unsigned char *keys) {
+int button_map(unsigned char rw, unsigned char profile, unsigned char button_num, unsigned char *keys, int verbose) {
 	int err;
 	unsigned char addr;
 	unsigned char buf[MSG_LEN];
@@ -1254,7 +1263,7 @@ int button_map(unsigned char rw, unsigned char profile, unsigned char button_num
 			buf[6] = keys[0];
 			buf[7] = keys[1];
 		}
-		err = write_addr(GLOBAL_PROFILE,addr,buf+4);
+		err = write_addr(GLOBAL_PROFILE,addr,buf+4,verbose);
 		if (err < 0){
 			fprintf(stderr, "Error setting button info\n");
 			return -1;

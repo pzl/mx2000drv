@@ -24,7 +24,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "mx.h"
 
 #define PROFILE_UNSET -1
-#define VB_PRINT(...) do { if (verbose){ fprintf(stderr, __VA_ARGS__); } } while (0)
 #define HELP(x) help(x,argv[0])
 
 static void help(int status, char *program_name);
@@ -347,24 +346,26 @@ int main(int argc, char **argv) {
 	err = initialize_usb();
 	if (err < 0){
 		finish_usb();
-		return -1;
+		return err;
 	}
 
 	err = find_device();
 	if (err < 0){
 		finish_usb();
-		return -1;
+		fprintf(stderr, "Error: Mouse not found, is it plugged in?.\n");
+		return err;
 	}
+	VB_PRINT("Connected to mouse\n");
 
 	if (profile == PROFILE_UNSET) {
 		profile = get_active_profile()+1;
 		VB_PRINT("No profile provided, using active profile %d if needed\n", profile );
 	}
 
-	err = action(n_addtl_cmds, argv+(optind+1), profile-1);
+	err = action(n_addtl_cmds, argv+(optind+1), profile-1, verbose);
 	if (err < 0){
 		finish_usb();
-		return -1;
+		return err;
 	}
 
 

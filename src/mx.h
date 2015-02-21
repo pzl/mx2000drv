@@ -20,6 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MX_MX_H
 
 
+#define VB_PRINT(...) do { if (verbose){ fprintf(stderr, __VA_ARGS__); } } while (0)
+
 #define MSG_LEN 8
 #define ADDR_DATA_LEN 4
 #define SEC_SIZE 256
@@ -78,8 +80,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define DARK_TIME_MSK 0x0F
 
 
-typedef int (*MXCommand)(int, char **, int);
-#define MXCOMMAND(func_name) int func_name(int argc, char **argv, int target_profile)
+typedef int (*MXCommand)(int, char **, int, int);
+#define MXCOMMAND(func_name) int func_name(int argc, char **argv, int target_profile, int verbose)
 
 
 static const unsigned char factory_settings[] = {
@@ -148,7 +150,7 @@ MXCOMMAND(macro);
 	Helpers
 */
 int read_addr(int profile, unsigned char addr, unsigned char *response); /* get info at address, safe */
-int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf); /* change info at address to new data. Performs sleep, section erasing and rewriting, and awakens. Can be called as long as device is open, but performs action immediately. Multiple changes to data should perform tasks on section-level basis, not this */
+int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf, int verbose); /* change info at address to new data. Performs sleep, section erasing and rewriting, and awakens. Can be called as long as device is open, but performs action immediately. Multiple changes to data should perform tasks on section-level basis, not this */
 int set_addr(unsigned char profile, unsigned char addr, unsigned char *buf); /* writes directly to addr. Does not check if mouse is sleeping, or erase has been performed. Should not be used outside of write_section */
 
 unsigned char get_active_profile(void);
@@ -156,7 +158,7 @@ int set_profile(unsigned char);
 int change_poll_rates(unsigned char rw, unsigned char *);
 int dpi_presets(unsigned char rw, unsigned char *);
 
-int button_map(unsigned char rw, unsigned char profile, unsigned char button_num, unsigned char *keys);
+int button_map(unsigned char rw, unsigned char profile, unsigned char button_num, unsigned char *keys, int verbose);
 
 int mouse_sleep(void);
 int mouse_wake(void);
