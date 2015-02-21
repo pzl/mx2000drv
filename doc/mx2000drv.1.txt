@@ -180,3 +180,7 @@ Authors
 
 Dan Panzarella <alsoelp@gmail.com>
 
+
+COPYING
+-------
+Copyright \(C) 2015  Dan Panzarella. Free use of this software is granted under the terms of the GNU General Public License (GPL) version 2.
