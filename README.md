@@ -92,6 +92,7 @@ Pipe current mouse settings into a hex viewer: `mx2000drv dump - | xxd`
 Notes
 ---------
 
+* The `button` and `macro` commands are **not yet** complete. See [Issue #3](https://github.com/pzl/mx2000drv/issues/3) for status. As of writing, the `button` command accepts a 4-character hex sequence as input that corresponds to the USB keyboard scan codes for a key. This is not going to be the final interface. The `macro` command is entirely non-functional.
 * This is a userspace driver, not for use as part of the kernel
 * This driver is only for settings configuration. It does not interact with the pointer or keyboard interfaces of the mouse. These will continue to use the default HID driver.
 
