@@ -14,7 +14,7 @@ CFLAGS += -fsanitize=address
 CFLAGS += -DVERSION=\"$(VERSION)\"
 SFLAGS = -std=c99 -pedantic
 INCLUDES = -I.
-LIBS = -lusb-1.0
+LIBS = -lhidapi-libusb
 SRCS = $(wildcard $(SRCDIR)/*.c)
 OBJS=$(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 

@@ -21,3 +21,4 @@
 
 
 SUBSYSTEM=="usb", ATTR{idVendor}=="1ea7", ATTR{idProduct}=="002c", MODE="0666"
+KERNEL=="hidraw*", ATTR{busnum}=="1", ATTR{idVendor}=="1ea7", ATTR{idProduct}=="002c", MODE="0666"

@@ -23,6 +23,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MX_PRODUCT_ID 0x002c
 #define MX_CONTROL_INTERFACE 2
 
+#define MX_PATH_BUF 256
+
+#define MX_MAX_MICE 10
 
 #define ERR_NO_HID -1
 #define ERR_KERNEL_DRIVER -2

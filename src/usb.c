@@ -17,92 +17,70 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include <stdio.h>
-#include <libusb-1.0/libusb.h>
+#include <string.h>
+#include <hidapi/hidapi.h>
 #include "usb.h"
 
-static int _is_mx(libusb_device *);
-
-libusb_device_handle *handle;
+hid_device *device;
 
 int initialize_usb(void) {
-	int ret;
-
-	ret = libusb_init(NULL);
-	if (ret < 0){
-		return ret;
+	if ( hid_init() != 0){
+		return ERR_NO_HID;
 	}
-
-	libusb_set_debug(NULL, 3);
-
-	if (libusb_has_capability(LIBUSB_CAP_HAS_CAPABILITY)){
-		if (libusb_has_capability(LIBUSB_CAP_HAS_HID_ACCESS) == 0){
-			fprintf(stderr, "Cannot access HID devices on this platform\n");
-			return ERR_NO_HID;
-		}
-		if (libusb_has_capability(LIBUSB_CAP_SUPPORTS_DETACH_KERNEL_DRIVER) == 0) {
-			fprintf(stderr, "Warn: may not be able to detach kernel driver\n");
-		}
-
-		//hotplug support
-		//ret = libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG);
-	}
-
 	return 0;
 }
 
 
 int find_device(void) {
-	libusb_device **list;
-	libusb_device *mx = NULL;
-	ssize_t count,
-			i;
-	int err;
+	struct hid_device_info *list,
+						   *current,
+						   *matches[MX_MAX_MICE];
+	int result;
+	unsigned int i, choice, n_matches = 0;
+	char path[MX_PATH_BUF];
 
-	if (handle != NULL){
-		fprintf(stderr, "Already active device\n");
-		return 0;
-	}
 
-	count = libusb_get_device_list(NULL, &list);
-	if (count < 0){
-		fprintf(stderr, "Problem enumerating USB devices\n");
-		return ERR_GET_DEVICE;
-	}
-
-	for (i=0; i < count; i++){
-		if (_is_mx(list[i])){
-			mx = list[i];
-			break;
-		}
-	}
-
-	if (!mx) {
+	if ((list = hid_enumerate(MX_VENDOR_ID, MX_PRODUCT_ID)) == NULL){
 		return ERR_NO_DEVICE;
 	}
-
-	if (libusb_open(mx, &handle)){
-		fprintf(stderr, "Error opening mx device\n");
-		return ERR_GET_DEVICE;
-	}
-	if (libusb_set_auto_detach_kernel_driver(handle, 1) != LIBUSB_SUCCESS) {
-		fprintf(stderr, "Error setting automatic kernel detachment\n");
-	}
-
-	if (libusb_kernel_driver_active(handle, MX_CONTROL_INTERFACE) == 1){
-		err = libusb_detach_kernel_driver(handle, MX_CONTROL_INTERFACE);
-		if (err < 0){
-			fprintf(stderr, "error detaching kernel driver: %s\n", libusb_strerror(err));
-			return ERR_KERNEL_DRIVER;
+	current = list;
+	while (current) {
+		//printf("Device Found--> 0x%04hx:0x%04hx, path: %s, Interface: %d\n",
+		//	current->vendor_id, current->product_id, current->path, current->interface_number);
+		if ( current->interface_number == MX_CONTROL_INTERFACE ) {
+			matches[n_matches++] = current;
 		}
-	} 
-	err = libusb_claim_interface(handle, MX_CONTROL_INTERFACE);
-	if (err < 0){
-		fprintf(stderr, "error claiming interface %s\n", libusb_strerror(err));
+		current = current->next;
+	}
+
+	if (n_matches > 1) {
+		printf("%u mice were found, use which one?\n", n_matches);
+		for (i=0; i<n_matches; i++){
+			printf("\t%u: %s\n", i+1, matches[i]->path);
+		}
+		result = scanf("%u",&choice);
+		if ( result == EOF || result == 0 ) {
+			fprintf(stderr, "No choice entered, exiting.\n");
+			hid_free_enumeration(list);
+			return ERR_GET_DEVICE;
+		}
+		choice--;
+	} else {
+		choice = 0;
+	}
+
+	strncpy(path, matches[choice]->path, MX_PATH_BUF);
+	path[sizeof(path)-1] = '\0';
+
+	hid_free_enumeration(list);
+
+	//printf("path: %s\n", path);
+
+	device = hid_open_path(path);
+	if (!device) {
+		fprintf(stderr, "Error opening mouse: %ls\n", hid_error(device));
 		return ERR_GET_DEVICE;
 	}
-	
-
-	libusb_free_device_list(list, 1);
 	return 0;
 }
 
@@ -117,73 +95,46 @@ int send_command(unsigned char *buf) {
 	int err;
 
 	/* Make sure we have a valid device handle */
-	if (handle == NULL){
+	if (device == NULL){
 		fprintf(stderr, "No device open for controlling\n");
 		return ERR_NO_DEVICE;
 	}
+	err = hid_write(device, buf, 8);
 
-	err = libusb_control_transfer(handle,
-	        LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE, /* bmRequestType 0x21 */
-	        0x09,													/* bRequest */
-	        0x02b3,													/* wValue */
-	        2,														/* wIndex */
-	        buf, 
-	        8,														/* data length */
-	        0);														/* timeout */
 	if (err < 0){
-		fprintf(stderr, "control error: %s\n", libusb_strerror(err));
+		fprintf(stderr, "control error: %ls\n", hid_error(device));
 		return -2;
 	}
 	return 0;
 }
 
 int read_back(unsigned char *buf){
-	int err,
-		nbytes_read;
+	int err;
 
 	/* Make sure we have a valid device handle */
-	if (handle == NULL){
+	if (device == NULL){
 		fprintf(stderr, "No device open for controlling\n");
 		return ERR_NO_DEVICE;
 	}
 
-
-	err = libusb_interrupt_transfer(handle,
-	        LIBUSB_ENDPOINT_IN | 3,
-	        buf, 8,
-	        &nbytes_read, 1000);
+	err = hid_read_timeout(device, buf, 8, 2000);
 
 	if (err < 0){
-		fprintf(stderr, "readback error: %s\n", libusb_strerror(err));
+		fprintf(stderr, "readback error: %ls\n", hid_error(device));
 		return ERR_CMD;
 	}
 
-	if (nbytes_read < 8){
-		fprintf(stderr, "Possible data underflow when receiving profile change acknowledgment. Got %d bytes back\n", nbytes_read);
+	if (err < 8){
+		fprintf(stderr, "Possible data underflow when receiving profile change acknowledgment. Got %d bytes back\n", err);
 		return ERR_CMD;
 	}
 
 	return 0;
-
 }
 
 void finish_usb(void) {
-	libusb_release_interface(handle,MX_CONTROL_INTERFACE);
-	libusb_attach_kernel_driver(handle,MX_CONTROL_INTERFACE);
-	libusb_close(handle);
-	libusb_exit(NULL);
-}
-
-static int _is_mx(libusb_device *device) {
-	struct libusb_device_descriptor desc;
-
-	if (libusb_get_device_descriptor(device, &desc)){
-		fprintf(stderr, "Error getting device desc\n");
-		return 0;
+	if (device){
+		hid_close(device);
 	}
-	if (desc.idVendor == MX_VENDOR_ID && desc.idProduct == MX_PRODUCT_ID) {
-		return 1;
-	}
-
-	return 0;
+	hid_exit();
 }

@@ -3,7 +3,7 @@
 Installation
 ----------------
 
-**Dependencies**: **[libusb](http://libusb.info/)** for communicating with the mouse. You must have libusb development headers installed for your platform
+**Dependencies**: **[HIDAPI](http://www.signal11.us/oss/hidapi/)** for communicating with the mouse. Version 0.5.0 and below used only libusb, but it was discovered this was [not compatible with Mac](http://www.libusb.org/ticket/89) when using HID devices (including this mouse). 
 
 1. `make`
 2. `sudo make install`
