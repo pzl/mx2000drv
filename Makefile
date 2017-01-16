@@ -14,7 +14,7 @@ CFLAGS += -fsanitize=address
 CFLAGS += -DVERSION=\"$(VERSION)\"
 SFLAGS = -std=c99 -pedantic
 INCLUDES = -I.
-LIBS = -lhidapi-libusb
+#LIBS = -lhidapi-libusb
 SRCS = $(wildcard $(SRCDIR)/*.c)
 OBJS=$(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
@@ -25,6 +25,17 @@ BSHDIR = $(DESTDIR)$(PREFIX)/share/bash-completion/completions
 ZSHDIR = $(DESTDIR)$(PREFIX)/share/zsh/site-functions
 UDVDIR = $(DESTDIR)/etc/udev/rules.d
 
+
+ifeq ($(OS),Windows_NT)
+	LIBS = 
+else
+	UNAME := $(shell uname -s)
+	ifeq ($(UNAME),Darwin)
+		LIBS = -lhidapi
+	else
+		LIBS = -lhidapi-libusb
+	endif
+endif
 
 
 RULES = 99-mx2000.rules
