@@ -47,7 +47,10 @@ int find_device(void) {
 	while (current) {
 		//printf("Device Found--> 0x%04hx:0x%04hx, path: %s, Interface: %d\n",
 		//	current->vendor_id, current->product_id, current->path, current->interface_number);
-		if ( current->interface_number == MX_CONTROL_INTERFACE ) {
+		if ( current->interface_number == MX_CONTROL_INTERFACE || // linux + windows, normal
+			( current->interface_number== -1 && current->path[strlen(current->path)-1] == MX_CONTROL_INTERFACE + '0' )) {
+			// OSX only gives -1 as interface_number, and makes it really difficult to determine which interface
+			// On recent releases (AFTER, NOT INCLUDING 0.8.0) of hidapi, the last character of path is interface
 			matches[n_matches++] = current;
 		}
 		current = current->next;

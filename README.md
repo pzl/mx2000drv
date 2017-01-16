@@ -5,6 +5,8 @@ Installation
 
 **Dependencies**: **[HIDAPI](http://www.signal11.us/oss/hidapi/)** for communicating with the mouse. Version 0.5.0 and below used only libusb, but it was discovered this was [not compatible with Mac](http://www.libusb.org/ticket/89) when using HID devices (including this mouse). 
 
+On Mac, you must install a very recent version of HIDAPI, probably using the [github](https://github.com/signal11/hidapi) version and installing from source. 0.8.0 does not include the changes necessary to attach to the right USB interface of the mouse.
+
 1. `make`
 2. `sudo make install`
 

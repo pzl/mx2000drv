@@ -32,8 +32,9 @@ else
 	UNAME := $(shell uname -s)
 	ifeq ($(UNAME),Darwin)
 		LIBS = -lhidapi
+		BSHDIR = $(DESTDIR)$(PREFIX)/etc/bash_completion.d
 	else
-		LIBS = -lhidapi-libusb
+		LIBS = -lhidapi-libusb # or could use -lhidapi-hidraw
 	endif
 endif
 
@@ -58,15 +59,19 @@ $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDES) -o $(TARGET) $(OBJS) $(LIBS)
 
 $(OBJS): $(OBJDIR)/%.o : $(SRCDIR)/%.c
-	$(CC) $(CFLAGS) $(SFLAGS) $(INCLUDES) -c -o $@ $< $(LIBS)
+	$(CC) $(CFLAGS) $(SFLAGS) $(INCLUDES) -c -o $@ $<
 
 
 install:
-	install -D -m 755 $(TARGET) "$(BINDIR)/$(TARGET)"
-	install -D -m 644 doc/$(TARGET).1 "$(MANDIR)/$(TARGET).1"
-	install -D -m 644 extra/$(RULES) "$(UDVDIR)/$(RULES)"
-	install -D -m 644 extra/bash_completion "$(BSHDIR)/$(TARGET)"
-	#install -D -m 644 extra/zsh_completion "$(ZSHDIR)/_$(TARGET)"
+	install -d -m 755 "$(BINDIR)"
+	install -d -m 755 "$(MANDIR)"
+	install -d -m 755 "$(UDVDIR)"
+	install -d -m 755 "$(BSHDIR)"
+	install -m 755 $(TARGET) "$(BINDIR)/$(TARGET)"
+	install -m 644 doc/$(TARGET).1 "$(MANDIR)/$(TARGET).1"
+	install -m 644 extra/$(RULES) "$(UDVDIR)/$(RULES)"
+	install -m 644 extra/bash_completion "$(BSHDIR)/$(TARGET)"
+	#install -m 644 extra/zsh_completion "$(ZSHDIR)/_$(TARGET)"
 
 uninstall:
 	$(RM) "$(BINDIR)/$(TARGET)"
