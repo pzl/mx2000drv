@@ -1,10 +1,10 @@
 kairos' notes:
 --------------
 I don't know a whole lot about the development world or GitHub, so if I've done anything unorthodox here, please let me know what I can do to fix this. As of right now, the macro function has been added with basic functionality. It takes input using fgets() then converts the ASCII over to USB scancodes with a "dictionary function" I wrote.
-
+```
 Syntax: mx2000drv macro (button number)
-Some examples of usage:
-mx2000drv macro 8
+
+kairos@defrag:~$ mx2000drv macro 8
 Enter any characters from [a-z, A-Z, 0-9, or other chars] to assign. (20 chars. max.)
 macro: ABCdefGHI
 Macro entry is: ABCdefGHI(end)
@@ -21,6 +21,8 @@ Warn: mouse profile may have changed, but got unknown response
 Warn: mouse profile may have changed, but got unknown response
 Warn: mouse profile may have changed, but got unknown response
 Warn: mouse profile may have changed, but got unknown response
+kairos@defrag:~$ 
+```
 THE ABOVE CODE SEEMS TO BE NORMAL. THE MACRO FUNCTION DOES INDEED WORK DESPITE THIS WARNING MESSAGE BEING PRINTED!
 note: Notice that "macro length" is "9" and the warning message appeared "9" times. This is printed once for each address (key in macro) written.
 
