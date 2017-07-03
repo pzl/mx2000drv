@@ -19,12 +19,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef MX_KEYS_H
 #define MX_KEYS_H
 
-
 #define MACRO_DELAY_TIMESCALE 8
 
 /* length of macro command is added to this base */
 #define MACRO_LOOP_LEN 0x80
-
 #define MAX_LOOP 0xFF
 
 /* Loop count or fire button are stored in global mem, in a macro setting area
@@ -41,11 +39,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define KEYTYPE_MACRO 0x80
 #define KEYTYE_INTERNAL 0x4A
 
-
-
-/* ---------
+/* ---------------------------------------------
 	KEYBOARD KEYS FOR BUTTON MAPPING AND MACROS
-   --------- */
+   --------------------------------------------- */
 
 /* ------------- keys you can press ------------ */
 /* 00 - 03 generated no events */

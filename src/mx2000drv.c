@@ -47,10 +47,10 @@ int main(int argc, char **argv) {
 		{NULL,		0,			 NULL,	0}
 	};
 
-
 	/*
 		Parse any options
 	*/
+
 	while ((opt = getopt_long(argc, argv, short_opt, long_opt, NULL)) != -1){
 		switch (opt) {
 			case 'p':
@@ -91,6 +91,7 @@ int main(int argc, char **argv) {
 	/*
 		Parse command and arguments
 	*/
+
 	if (argv[optind] == NULL){
 		fprintf(stderr, "A command is required. None provided\n");
 		HELP(-2);
@@ -108,7 +109,6 @@ int main(int argc, char **argv) {
 	} else {
 		third_cmd = argv[optind+2];
 	}
-
 
 	action = NULL;
 
@@ -151,7 +151,16 @@ int main(int argc, char **argv) {
 			}
 		}
 	} else if (strcmp(command,"macro") == 0 ) {
-
+		action = macro;
+		if (n_addtl_cmds < 1 || n_addtl_cmds > 2) {
+			fprintf(stderr, "Invalid number of arguments\n");
+			HELP(-2);
+		}
+		int button_num = atoi(sec_cmd);
+		if (button_num < 1 || button_num > 8) {
+			fprintf(stderr, "Error: Button number out of range (1-8).\n");
+			HELP(-2);
+		}
 	} else if (strcmp(command,"breathe") == 0 ) {
 		action = breathe;
 		if (n_addtl_cmds > 1) {
@@ -339,10 +348,10 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 
-
 	/*
 		Setup USB, get device, perform commands, and close up shop
 	*/
+
 	err = initialize_usb();
 	if (err < 0){
 		finish_usb();
@@ -368,11 +377,9 @@ int main(int argc, char **argv) {
 		return err;
 	}
 
-
 	finish_usb();
 	return 0;
 }
-
 
 static void help(int status, char *pgname) {
 	const char *usage = "Usage: %s [OPTIONS] COMMAND [ARGUMENTS]\n"

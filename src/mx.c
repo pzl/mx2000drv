@@ -21,8 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h> /* memcpy */
 #include "usb.h"
 #include "mx.h"
-
-
+#include "keys.h"
 
 MXCOMMAND(print_profile) {
 	unsigned char profile;
@@ -307,7 +306,6 @@ MXCOMMAND(dark_time) {
 	return 0;
 }
 
-
 MXCOMMAND(pulse_time) {
 	int err;
 	unsigned char addr, value;
@@ -351,6 +349,7 @@ MXCOMMAND(pulse_time) {
 
 	return 0;
 }
+
 MXCOMMAND(standby_time) {
 	int err;
 	unsigned char addr, value;
@@ -394,7 +393,6 @@ MXCOMMAND(standby_time) {
 
 	return 0;
 }
-
 
 MXCOMMAND(sensitivity) {
 	int err, axis;
@@ -585,7 +583,6 @@ MXCOMMAND(dpi_value) {
 	return 0;
 }
 
-
 MXCOMMAND(dpi_active) {
 	int err;
 	unsigned char presets[2];
@@ -638,7 +635,6 @@ MXCOMMAND(dpi_active) {
 
 	return 0;
 }
-
 
 MXCOMMAND(poll_rates) {
 	int err;
@@ -754,6 +750,16 @@ MXCOMMAND(macro) {
 	unsigned char button_keys[2];
 	char *end;
 
+	/*
+		IN A NUTSHELL:
+		1.	get button number
+		2.	get macro input
+		3.	use macro data to assign button (position, num_of_keys + 0x80)
+		4.	write macro data
+		5.	clean up and close out
+	*/
+
+	// get button number ------------------------
 	button_num_ul = strtoul(argv[0],&end,10);
 	if (*end != '\0') {
 		fprintf(stderr, "Error: button was not a valid number\n");
@@ -765,17 +771,46 @@ MXCOMMAND(macro) {
 		return -1;
 	}
 	button_num = (unsigned char) button_num_ul;
+	// got button number ------------------------
 
-	(void) button_keys;
-	(void) button_num;
-	(void) err;
-	(void) argc;
-	(void) target_profile;
-	(void) verbose;
+	// get macro entry from user ----------------
+	char* macro = malloc((sizeof(char) * 20)); // enough bytes for 20 keys
+    if (macro == NULL) {
+        printf ("macro: No memory\n");
+        return -1;
+    }
+	printf("Enter any characters from [a-z, A-Z, 0-9, or other chars] to assign. (20 chars. max.)\nmacro: ");
+	fgets(macro, (sizeof(char) * 20), stdin); // will only accept 20 chars regardless of input
 
+	/* Remove trailing newline, if there. */
+    if ((strlen(macro)>0) && (macro[strlen(macro)-1] == '\n')) {
+        macro[strlen(macro)-1] = '\0';
+    }
+    printf("Macro entry is: %s(end)\nMacro entry end: %c(end)\n", macro, macro[strlen(macro)-1]);
+    printf("Macro length is: %lu\n", strlen(macro));
+    // got macro entry from user ----------------
+
+    // assign button to macro position and macro length
+	button_keys[0] = 0x0A;
+	button_keys[1] = MACRO_LOOP_LEN+(strlen(macro)*2);
+	printf("Button %ld: %#x, %#x\n", button_num_ul, button_keys[0], button_keys[1]);
+	err = button_map(ADMIN_WRITE, target_profile, button_num, button_keys, verbose);
+	if (err < 0) {
+		fprintf(stderr, "Error setting button mapping\n");
+		return -1;
+	}
+	// button assigned to macro position and macro length
+
+	// now actually write the macro data and free up memory
+	macro_map(macro, 0, verbose);
+    free(macro);
+    // success!
+
+	(void)argc; // im not using this yet, it will be used later
+
+	// return successfully :]
 	return 0;
 }
-
 
 MXCOMMAND(read_info) {
 	FILE *fp;
@@ -839,9 +874,7 @@ MXCOMMAND(read_info) {
 
 	free(buf);
 	return err;
-
 }
-
 
 MXCOMMAND(load_info) {
 	FILE *fp;
@@ -882,7 +915,6 @@ MXCOMMAND(load_info) {
 	return err;
 }
 
-
 MXCOMMAND(factory_reset) {
 	int err;
 	unsigned char *buf, *bufp;
@@ -890,7 +922,7 @@ MXCOMMAND(factory_reset) {
 	(void)argc;
 	(void)argv;
 	(void)target_profile;
-	(void) verbose;
+	(void)verbose;
 
 	buf = malloc(sizeof(unsigned char)*BUF_SIZE);
 	bufp = buf;
@@ -914,17 +946,16 @@ MXCOMMAND(factory_reset) {
 	return err;
 }
 
-
 /* ---------------------------------------------------
 		Helper functions,
 		not necessarily outside commands
 ------------------------------------------------------ */
 
-
 /*
 	Reads data from section 'profile' and address 'addr' into the
 	already-allocated response buffer which MUST be MSG_LEN(8) size
 */
+
 int read_addr(int profile, unsigned char addr, unsigned char *response){
 	int err;
 	unsigned char command[MSG_LEN] = {
@@ -947,6 +978,7 @@ int read_addr(int profile, unsigned char addr, unsigned char *response){
 	addr: in the range 0x00-0xFC inclusive, in increments of 4
 	buf: array of ADDR_DATA_LEN(4) uchars of data to write
 */
+
 int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf, int verbose) {
 	unsigned char cur_prof;
 	unsigned char sec[SEC_SIZE];
@@ -1008,6 +1040,7 @@ int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf, in
 	level operations. Should not be performed in isolation, but only through
 	section-level commands. after proper sleep, read, and erase.
 */
+
 int set_addr(unsigned char profile, unsigned char addr, unsigned char *buf) {
 	int err;
 	unsigned char response[MSG_LEN],
@@ -1050,8 +1083,6 @@ int set_addr(unsigned char profile, unsigned char addr, unsigned char *buf) {
 	return err;
 }
 
-
-
 unsigned char get_active_profile(void) {
 	int err;
 	unsigned char response[MSG_LEN],
@@ -1071,7 +1102,6 @@ unsigned char get_active_profile(void) {
 	}
 
 	return (response[4] >> 4) ;
-
 }
 
 int set_profile(unsigned char profile) {
@@ -1121,6 +1151,7 @@ int set_profile(unsigned char profile) {
 	rates should already have allocated
 	enough space for TWO (2) uchars
 */
+
 int change_poll_rates(unsigned char rw, unsigned char *rates){
 	int err;
 	unsigned char response[MSG_LEN],
@@ -1170,11 +1201,11 @@ int change_poll_rates(unsigned char rw, unsigned char *rates){
 	return 0;
 }
 
-
 /*
 	presets should already have allocated
 	enough space for TWO (2) uchars
 */
+
 int dpi_presets(unsigned char rw, unsigned char *presets) {
 	int err;
 	unsigned char response[MSG_LEN],
@@ -1344,7 +1375,6 @@ int write_section(unsigned char section_num, unsigned char *buf){
 	}
 
 	return 0;
-
 }
 
 int erase_section(unsigned char section_num) {
@@ -1438,4 +1468,149 @@ int write_buf(unsigned char *buf) {
 
 
 	return err;
+}
+
+/*
+	kairos' new functions for macros
+*/
+
+// this just sets buf[] = 0
+void spacer(unsigned char* buf) {
+	buf[0] = 0xFF;
+	buf[1] = 0xFF;
+	buf[2] = 0xFF;
+	buf[3] = 0xFF;
+}
+
+// this is basically a dictionary lookup in our keys.h
+unsigned long convert_key(char key) {
+	const unsigned long letters_const[26] = {
+		KEY_a, KEY_b, KEY_c, KEY_d, KEY_e, KEY_f, KEY_g,
+		KEY_h, KEY_i, KEY_j, KEY_k, KEY_l, KEY_m, KEY_n,
+		KEY_o, KEY_p, KEY_q, KEY_r, KEY_s, KEY_t, KEY_u,
+		KEY_v, KEY_w, KEY_x, KEY_y, KEY_z
+	};
+	const unsigned long numbers_const[26] = {
+		KEY_0, KEY_1, KEY_2, KEY_3, KEY_4,
+		KEY_5, KEY_6, KEY_7, KEY_8, KEY_9
+	};
+	const unsigned long other_const[11] = {
+		KEY_GRAVE, KEY_MINUS, KEY_EQUAL, KEY_BACKSLASH, KEY_OPEN_BRACKET,
+		KEY_CLOSE_BRACKET, KEY_SEMICOLON, KEY_APOSTROPHE, KEY_COMMA, KEY_PERIOD, KEY_SLASH
+	};
+	const char lowercase_chars[26] = {
+		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+		'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+		'u', 'v', 'w', 'x', 'y', 'z'
+	};
+	const char uppercase_chars[26] = {
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+		'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+		'U', 'V', 'W', 'X', 'Y', 'Z'
+	};
+	const char number_chars[10] = {
+		'0', '1', '2', '3', '4',
+		'5', '6', '7', '8', '9'
+	};
+	const char shiftnum_chars[10] = {
+		')', '!', '@', '#', '$',
+		'%', '^', '&', '*', '('
+	};
+	const char other_chars[11] = {
+		'`', '-', '=', '\\', '[',
+		']', ';', '\'', ',', '.', '/'
+	};
+	const char shiftother_chars[11] = {
+		'~', '_', '+', '|', '{',
+		'}', ':', '"', '<', '>', '?'
+	};
+
+	for (int i=0; i<26; i++) {
+		if (key == lowercase_chars[i]) {return letters_const[i];}
+		else if (key == uppercase_chars[i]) {return letters_const[i]+MOD_SHIFT;}
+		else if (i<11) {
+			if (key == other_chars[i]) {return other_const[i];}
+			else if (key == shiftother_chars[i]) {return other_const[i]+MOD_SHIFT;}
+		} else if (i<10) {
+			if (key == number_chars[i]) {return numbers_const[i];}
+			else if (key == shiftnum_chars[i]) {return numbers_const[i]+MOD_SHIFT;}
+		} else {continue;}
+	}
+	return KEY_z;
+}
+
+// takes an array of chars input by the user and writes them starting at 0x0A
+// currently has support for ALL TYPABLE ASCII CHARACTERS
+// meaning all this: [a-z A-Z 0-9] AND `~!@#$%^&*()-_=+\|[]{};:'",<.>/?
+// TODO: add multiprofile support, add read/write support, add multimacro support
+int macro_map(char* macro_keys, unsigned char profile, int verbose) {
+	int err;
+	unsigned char addr;
+	unsigned char buf[ADDR_DATA_LEN];
+
+	addr = 0x08;
+	//addr += 0x100 * profile //I really don't know about this yet
+
+	buf[0] = 0xFF;
+	buf[1] = 0xFF;
+	buf[2] = (convert_key(macro_keys[0]) & 0xFF00) >> 8;
+	buf[3] = convert_key(macro_keys[0]) & 0x00FF;
+	err = write_addr(profile,addr,buf,verbose);
+	if (err < 0){
+		fprintf(stderr, "Error writing addr\n");
+		return -1;
+	}
+	addr += MACRO_ADDR_NEXT_STEP;
+	for (int i=1; i<20; i++) {
+		if (buf[3] == 0x00) {
+			if (macro_keys[i] != 0 && macro_keys[i+1] == 0) {
+				buf[0] = 0x00;
+				buf[1] = 0x00;
+				buf[2] = (convert_key(macro_keys[i]) & 0xFF00) >> 8;
+				buf[3] = convert_key(macro_keys[i]) & 0x00FF;
+				err = write_addr(profile,addr,buf,verbose);
+				if (err < 0){
+					fprintf(stderr, "Error writing addr\n");
+					return -1;
+				}
+				break;
+			} else if (macro_keys[i] != 0 && macro_keys[i+1] != 0) {
+				buf[0] = 0x00;
+				buf[1] = 0x00;
+				buf[2] = (convert_key(macro_keys[i]) & 0xFF00) >> 8;
+				buf[3] = convert_key(macro_keys[i]) & 0x00FF;
+				err = write_addr(profile,addr,buf,verbose);
+				if (err < 0){
+					fprintf(stderr, "Error writing addr\n");
+					return -1;
+				}
+				addr += MACRO_ADDR_NEXT_STEP;
+			}
+		} else if (buf[3] != 0x00) {
+			if (macro_keys[i] != 0 && macro_keys[i+1] == 0) {
+				buf[0] = (convert_key(macro_keys[i]) & 0xFF00) >> 8;
+				buf[1] = convert_key(macro_keys[i]) & 0x00FF;
+				buf[2] = 0x00;
+				buf[3] = 0x00;
+				err = write_addr(profile,addr,buf,verbose);
+				if (err < 0){
+					fprintf(stderr, "Error writing addr\n");
+					return -1;
+				}
+				break;
+			} else if (macro_keys[i] != 0 && macro_keys[i+1] != 0) {
+				buf[0] = (convert_key(macro_keys[i]) & 0xFF00) >> 8;
+				buf[1] = convert_key(macro_keys[i]) & 0x00FF;
+				buf[2] = 0x00;
+				buf[3] = 0x00;
+				err = write_addr(profile,addr,buf,verbose);
+				if (err < 0){
+					fprintf(stderr, "Error writing addr\n");
+					return -1;
+				}
+				addr += MACRO_ADDR_NEXT_STEP;
+			}
+		}
+	}
+	return 0;
 }

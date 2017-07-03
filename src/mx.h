@@ -32,7 +32,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define NUM_PROFILES 4
 #define GLOBAL_PROFILE 5
 
-
 #define GLOBAL_PREFIX 0xB3
 
 #define ADDR_START 0x00
@@ -43,11 +42,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define ADDR_READ 0x02
 #define SEC_ERASE 0x03
 
-
 /* gap between repeated settings for next profile */
 #define SETTING_ADDR_PROFILE_STEP 0x08
 #define BUTTON_ADDR_PROFILE_STEP 0x20
-
 
 #define BUTTON_ADDR_START 0x00
 #define MACRO_ADDR_START 0x18
@@ -168,5 +165,10 @@ int write_section(unsigned char section_num, unsigned char *buf);
 int erase_section(unsigned char section_num);
 
 int write_buf(unsigned char *buf);
+
+/* kairos' macro functions */
+void spacer(unsigned char* buf);
+unsigned long convert_key(char key);
+int macro_map(char* macro_keys, unsigned char profile, int verbose);
 
 #endif
