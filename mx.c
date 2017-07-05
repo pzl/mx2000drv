@@ -774,25 +774,27 @@ MXCOMMAND(macro) {
 	// got button number ------------------------
 
 	// get macro entry from user ----------------
-	char* macro = malloc((sizeof(char) * 20)); // enough bytes for 20 keys
+	char* macro = malloc((sizeof(char) * 50)); // enough bytes for 50 keys
     if (macro == NULL) {
         printf ("macro: No memory\n");
         return -1;
     }
-	printf("Enter any characters from [a-z, A-Z, 0-9, or other chars] to assign. (20 chars. max.)\nmacro: ");
-	fgets(macro, (sizeof(char) * 20), stdin); // will only accept 20 chars regardless of input
+	printf("Enter any characters from [a-z, A-Z, 0-9, or other chars] to assign. (50 chars. max.)\nmacro: ");
+	fgets(macro, (sizeof(char) * 50), stdin); // will only accept 50 chars regardless of input
 
-	/* Remove trailing newline, if there. */
+	// Remove trailing newline, if there. This may not be needed
+
     if ((strlen(macro)>0) && (macro[strlen(macro)-1] == '\n')) {
         macro[strlen(macro)-1] = '\0';
     }
+
     printf("Macro entry is: %s(end)\nMacro entry end: %c(end)\n", macro, macro[strlen(macro)-1]);
     printf("Macro length is: %lu\n", strlen(macro));
     // got macro entry from user ----------------
 
     // assign button to macro position and macro length
 	button_keys[0] = 0x0A;
-	button_keys[1] = MACRO_LOOP_LEN+(strlen(macro)*2);
+	button_keys[1] = MACRO_LOOP_LEN+findlength(macro);
 	printf("Button %ld: %#x, %#x\n", button_num_ul, button_keys[0], button_keys[1]);
 	err = button_map(ADMIN_WRITE, target_profile, button_num, button_keys, verbose);
 	if (err < 0) {
@@ -802,7 +804,7 @@ MXCOMMAND(macro) {
 	// button assigned to macro position and macro length
 
 	// now actually write the macro data and free up memory
-	macro_map(macro, 0, verbose);
+	macro_map(macro);
     free(macro);
     // success!
 
@@ -1474,12 +1476,132 @@ int write_buf(unsigned char *buf) {
 	kairos' new functions for macros
 */
 
-// this just sets buf[] = 0
-void spacer(unsigned char* buf) {
-	buf[0] = 0xFF;
-	buf[1] = 0xFF;
-	buf[2] = 0xFF;
-	buf[3] = 0xFF;
+// takes an array of chars input by the user and writes them starting at 0x0A
+// currently has support for ALL TYPABLE ASCII CHARACTERS
+// meaning all this: [a-z A-Z 0-9] AND `~!@#$%^&*()-_=+\|[]{};:'",<.>/?
+// TODO: add multiprofile support, add read/write support, add multimacro support
+int macro_map(char* macro_keys) {
+	int err;
+	int bytes_written;
+
+	err = erase_section(0);
+	if (err < 0) {
+		fprintf(stderr, "Error erasing section\n");
+		return -1;
+	}
+
+	unsigned char *buf = malloc(sizeof(unsigned char)*SEC_SIZE);
+	unsigned char *bufp = buf;
+	memset(bufp, 0xFF, (ADDR_DATA_LEN*2)+2);
+	bufp += (ADDR_DATA_LEN*2)+2;
+	bytes_written = 0x0A;
+
+	for (int i=0; i<50; i++) {
+		if (macro_keys[i] != 0 && macro_keys[i+1] != 0) {
+			if (isUpper(macro_keys[i]) == 1) {
+				*bufp++ = (convert_key(macro_keys[i]) & 0xFF00) >> 8;
+				*bufp++ = convert_key(macro_keys[i]) & 0x00FF;
+				for (int j=0; j<4; j++) {
+					*bufp++ = 0x00;
+				}
+				bytes_written = bytes_written + 0x06;
+			} else if (isUpper(macro_keys[i]) == 0) {
+				*bufp++ = (convert_key(macro_keys[i]) & 0xFF00) >> 8;
+				*bufp++ = convert_key(macro_keys[i]) & 0x00FF;
+				*bufp++ = 0x00;
+				*bufp++ = 0x00;
+				bytes_written = bytes_written + 0x04;
+			}
+		} else if (macro_keys[i] != 0 && macro_keys[i+1] == 0) {
+			if (isUpper(macro_keys[i]) == 1) {
+				*bufp++ = (convert_key(macro_keys[i]) & 0xFF00) >> 8;
+				*bufp++ = convert_key(macro_keys[i]) & 0x00FF;
+				for (int j=0; j<4; j++) {
+					*bufp++ = 0x00;
+				}
+				bytes_written = bytes_written + 0x06;
+			} else if (isUpper(macro_keys[i]) == 0) {
+				*bufp++ = (convert_key(macro_keys[i]) & 0xFF00) >> 8;
+				*bufp++ = convert_key(macro_keys[i]) & 0x00FF;
+				*bufp++ = 0x00;
+				*bufp++ = 0x00;
+				bytes_written = bytes_written + 0x04;
+			}
+			break;
+		}
+	}
+
+	memset(bufp, 0xFF, (ADDR_STOP - bytes_written));
+	bufp += (ADDR_STOP - bytes_written);
+
+	err = mouse_sleep();
+	if (err < 0) {
+		fprintf(stderr, "Error trying to put mouse to sleep\n");
+		mouse_wake();
+	}
+
+	err = write_section(0, buf);
+	if (err < 0) {
+		fprintf(stderr, "Error writing section\n");
+		return -1;
+	}
+
+	err = mouse_wake();
+	if (err < 0) {
+		fprintf(stderr, "Error trying to wake mouse up\n");
+	}
+
+	free(buf);
+
+	return 0;
+}
+
+int findlength(char* str) {
+	const char upper_chars[47] = {
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+		'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+		'U', 'V', 'W', 'X', 'Y', 'Z', ')', '!', '@', '#',
+		'$', '%', '^', '&', '*', '(', '~', '_', '+', '|',
+		'{', '}', ':', '"', '<', '>', '?'
+	};
+	const char lower_chars[47] = {
+		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+		'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+		'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3',
+		'4', '5', '6', '7', '8', '9', '`', '-', '=', '\\',
+		'[', ']', ';', '\'', ',', '.', '/'
+	};
+	int upper = 0, lower = 0, index = 0, macrolength;
+
+   	while (str[index] != 0) {
+   		for (int i=0; i<47; i++) {
+   			if (str[index] == upper_chars[i]) {
+   				upper++;
+   			} else if (str[index] == lower_chars[i] || str[index] == ' ') {
+   				lower++;
+   			}
+   		}
+    	index++;
+	}
+
+	macrolength = lower * 2;
+	macrolength += upper * 3;
+	return macrolength;
+}
+
+int isUpper(char key) {
+	const char uppercase_chars[47] = {
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+		'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+		'U', 'V', 'W', 'X', 'Y', 'Z', ')', '!', '@', '#',
+		'$', '%', '^', '&', '*', '(', '~', '_', '+', '|',
+		'{', '}', ':', '"', '<', '>', '?' };
+	for (int i=0; i<47; i++) {
+		if (key == uppercase_chars[i]) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
 // this is basically a dictionary lookup in our keys.h
@@ -1490,7 +1612,7 @@ unsigned long convert_key(char key) {
 		KEY_o, KEY_p, KEY_q, KEY_r, KEY_s, KEY_t, KEY_u,
 		KEY_v, KEY_w, KEY_x, KEY_y, KEY_z
 	};
-	const unsigned long numbers_const[26] = {
+	const unsigned long numbers_const[10] = {
 		KEY_0, KEY_1, KEY_2, KEY_3, KEY_4,
 		KEY_5, KEY_6, KEY_7, KEY_8, KEY_9
 	};
@@ -1526,91 +1648,17 @@ unsigned long convert_key(char key) {
 	};
 
 	for (int i=0; i<26; i++) {
+		if (key == ' ') {return KEY_SPACE;}
 		if (key == lowercase_chars[i]) {return letters_const[i];}
-		else if (key == uppercase_chars[i]) {return letters_const[i]+MOD_SHIFT;}
-		else if (i<11) {
+		if (key == uppercase_chars[i]) {return letters_const[i]+MOD_SHIFT;}
+		if (i<11) {
 			if (key == other_chars[i]) {return other_const[i];}
 			else if (key == shiftother_chars[i]) {return other_const[i]+MOD_SHIFT;}
-		} else if (i<10) {
+		}
+		if (i<10) {
 			if (key == number_chars[i]) {return numbers_const[i];}
 			else if (key == shiftnum_chars[i]) {return numbers_const[i]+MOD_SHIFT;}
-		} else {continue;}
-	}
-	return KEY_z;
-}
-
-// takes an array of chars input by the user and writes them starting at 0x0A
-// currently has support for ALL TYPABLE ASCII CHARACTERS
-// meaning all this: [a-z A-Z 0-9] AND `~!@#$%^&*()-_=+\|[]{};:'",<.>/?
-// TODO: add multiprofile support, add read/write support, add multimacro support
-int macro_map(char* macro_keys, unsigned char profile, int verbose) {
-	int err;
-	unsigned char addr;
-	unsigned char buf[ADDR_DATA_LEN];
-
-	addr = 0x08;
-	//addr += 0x100 * profile //I really don't know about this yet
-
-	buf[0] = 0xFF;
-	buf[1] = 0xFF;
-	buf[2] = (convert_key(macro_keys[0]) & 0xFF00) >> 8;
-	buf[3] = convert_key(macro_keys[0]) & 0x00FF;
-	err = write_addr(profile,addr,buf,verbose);
-	if (err < 0){
-		fprintf(stderr, "Error writing addr\n");
-		return -1;
-	}
-	addr += MACRO_ADDR_NEXT_STEP;
-	for (int i=1; i<20; i++) {
-		if (buf[3] == 0x00) {
-			if (macro_keys[i] != 0 && macro_keys[i+1] == 0) {
-				buf[0] = 0x00;
-				buf[1] = 0x00;
-				buf[2] = (convert_key(macro_keys[i]) & 0xFF00) >> 8;
-				buf[3] = convert_key(macro_keys[i]) & 0x00FF;
-				err = write_addr(profile,addr,buf,verbose);
-				if (err < 0){
-					fprintf(stderr, "Error writing addr\n");
-					return -1;
-				}
-				break;
-			} else if (macro_keys[i] != 0 && macro_keys[i+1] != 0) {
-				buf[0] = 0x00;
-				buf[1] = 0x00;
-				buf[2] = (convert_key(macro_keys[i]) & 0xFF00) >> 8;
-				buf[3] = convert_key(macro_keys[i]) & 0x00FF;
-				err = write_addr(profile,addr,buf,verbose);
-				if (err < 0){
-					fprintf(stderr, "Error writing addr\n");
-					return -1;
-				}
-				addr += MACRO_ADDR_NEXT_STEP;
-			}
-		} else if (buf[3] != 0x00) {
-			if (macro_keys[i] != 0 && macro_keys[i+1] == 0) {
-				buf[0] = (convert_key(macro_keys[i]) & 0xFF00) >> 8;
-				buf[1] = convert_key(macro_keys[i]) & 0x00FF;
-				buf[2] = 0x00;
-				buf[3] = 0x00;
-				err = write_addr(profile,addr,buf,verbose);
-				if (err < 0){
-					fprintf(stderr, "Error writing addr\n");
-					return -1;
-				}
-				break;
-			} else if (macro_keys[i] != 0 && macro_keys[i+1] != 0) {
-				buf[0] = (convert_key(macro_keys[i]) & 0xFF00) >> 8;
-				buf[1] = convert_key(macro_keys[i]) & 0x00FF;
-				buf[2] = 0x00;
-				buf[3] = 0x00;
-				err = write_addr(profile,addr,buf,verbose);
-				if (err < 0){
-					fprintf(stderr, "Error writing addr\n");
-					return -1;
-				}
-				addr += MACRO_ADDR_NEXT_STEP;
-			}
 		}
 	}
-	return 0;
+	return KEY_z;
 }

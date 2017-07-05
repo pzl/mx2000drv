@@ -142,10 +142,10 @@ MXCOMMAND(dpi_active);
 MXCOMMAND(button);
 MXCOMMAND(macro);
 
-
 /*
 	Helpers
 */
+
 int read_addr(int profile, unsigned char addr, unsigned char *response); /* get info at address, safe */
 int write_addr(unsigned char profile, unsigned char addr, unsigned char *buf, int verbose); /* change info at address to new data. Performs sleep, section erasing and rewriting, and awakens. Can be called as long as device is open, but performs action immediately. Multiple changes to data should perform tasks on section-level basis, not this */
 int set_addr(unsigned char profile, unsigned char addr, unsigned char *buf); /* writes directly to addr. Does not check if mouse is sleeping, or erase has been performed. Should not be used outside of write_section */
@@ -166,9 +166,13 @@ int erase_section(unsigned char section_num);
 
 int write_buf(unsigned char *buf);
 
-/* kairos' macro functions */
-void spacer(unsigned char* buf);
+/*
+	kairos' macro functions
+*/
+
+int macro_map(char* macro_keys);
+int findlength(char* str);
+int isUpper(char key);
 unsigned long convert_key(char key);
-int macro_map(char* macro_keys, unsigned char profile, int verbose);
 
 #endif
